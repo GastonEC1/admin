@@ -152,6 +152,17 @@ function AddActivo() {
                         <option value="Pendiente de Mantenimiento">Pendiente de Mantenimiento</option>
                     </Form.Select>
                 </Form.Group>
+
+                <Button variant="primary" type="submit" className="w-100 mt-3">
+                    Crear Activo
+                </Button>
+                <Button 
+                    variant="secondary" 
+                    className="w-100 mt-2" 
+                    onClick={() => navigate(`/consorcios/${consorcioId}`)} 
+                >
+                    Cancelar
+                </Button>
             </Form>
         </Container>
     );
