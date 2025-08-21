@@ -116,4 +116,30 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.delete('/:id', async (req, res) => {
+    try {
+        const consorcio = await Consorcio.findById(req.params.id);
+
+        if (!consorcio) {
+            return res.status(404).json({ msg: 'Consorcio no encontrado para eliminar.' });
+        }
+
+        // Paso crucial: Eliminar inquilinos asociados a este consorcio
+        await Inquilino.deleteMany({ consorcio: req.params.id });
+        // Paso crucial: Eliminar activos asociados a este consorcio
+        await Activo.deleteMany({ consorcio: req.params.id });
+
+        // Finalmente, eliminar el consorcio
+        await Consorcio.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'Consorcio y sus datos relacionados eliminados con éxito.' });
+
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(400).json({ msg: 'ID de consorcio no válido para eliminación.' });
+        }
+        res.status(500).send('Error del servidor al eliminar consorcio.');
+    }
+});
+
 module.exports = router;

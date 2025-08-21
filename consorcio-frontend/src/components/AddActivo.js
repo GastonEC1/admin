@@ -152,40 +152,6 @@ function AddActivo() {
                         <option value="Pendiente de Mantenimiento">Pendiente de Mantenimiento</option>
                     </Form.Select>
                 </Form.Group>
-
-                {/* Nuevos campos para el último mantenimiento y costo */}
-                <h5 className="mt-4">Información del Último Mantenimiento (Opcional)</h5>
-                <Form.Group className="mb-3" controlId="formUltimoCostoMantenimiento">
-                    <Form.Label>Costo del Último Mantenimiento ($)</Form.Label>
-                    <Form.Control 
-                        type="number" 
-                        step="0.01" 
-                        placeholder="15000.00" 
-                        value={ultimoCostoMantenimiento} 
-                        onChange={(e) => setUltimoCostoMantenimiento(e.target.value)} 
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="formFechaUltimoMantenimiento">
-                    <Form.Label>Fecha del Último Mantenimiento</Form.Label>
-                    <Form.Control 
-                        type="date" 
-                        value={fechaUltimoMantenimiento} 
-                        onChange={(e) => setFechaUltimoMantenimiento(e.target.value)} 
-                    />
-                </Form.Group>
-
-
-                <Button variant="primary" type="submit" className="w-100 mt-3">
-                    Crear Activo
-                </Button>
-                <Button 
-                    variant="secondary" 
-                    className="w-100 mt-2" 
-                    onClick={() => navigate(`/consorcios/${consorcioId}`)} 
-                >
-                    Cancelar
-                </Button>
             </Form>
         </Container>
     );

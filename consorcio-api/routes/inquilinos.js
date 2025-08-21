@@ -151,4 +151,37 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.delete('/:id', async (req, res) => {
+    try {
+        let inquilino = await Inquilino.findById(req.params.id);
+
+        if (!inquilino) {
+            return res.status(404).json({ msg: 'Inquilino no encontrado para eliminar.' });
+        }
+
+        const consorcioId = inquilino.consorcio;
+
+        // Eliminar el inquilino de la base de datos
+        await Inquilino.findByIdAndDelete(req.params.id);
+
+        // Desasociar el inquilino del consorcio al que pertenecía
+        if (consorcioId) {
+            await Consorcio.findByIdAndUpdate(
+                consorcioId,
+                { $pull: { inquilinos: req.params.id } }, // Usa $pull para remover el ID del array
+                { new: true, useFindAndModify: false }
+            );
+        }
+
+        res.json({ msg: 'Inquilino eliminado con éxito.' });
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(400).json({ msg: 'ID de inquilino no válido para eliminación.' });
+        }
+        res.status(500).send('Error del servidor al eliminar inquilino.');
+    }
+});
+
+
 module.exports = router;

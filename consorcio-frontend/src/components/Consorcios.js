@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Table, Alert, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaEdit } from 'react-icons/fa'; // Asegúrate de importar FaEdit para el botón de editar
+import { FaTrash, FaEdit } from 'react-icons/fa'; 
 
 function Consorcios() {
     const [consorcios, setConsorcios] = useState([]);
@@ -10,7 +10,7 @@ function Consorcios() {
     const [error, setError] = useState('');
 
     // ¡VERIFICA ESTA URL! Debe ser la de tu puerto 5000 de Codespaces + /api/consorcios
-    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api/consorcios';
+    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api/consorcios'; // Asegúrate que esta URL sea correcta para tu entorno
     const token = localStorage.getItem('token');
 
     // Efecto para cargar los consorcios cuando el componente se monta
@@ -88,8 +88,7 @@ function Consorcios() {
                         <tr>
                             <th>Nombre</th>
                             <th>Dirección</th>
-                            <th>Pisos</th>
-                            <th>Unidades</th>
+                            {/* Eliminadas las columnas de Pisos y Unidades */}
                             <th>Acciones</th> {/* Columna para los botones de acción */}
                         </tr>
                     </thead>
@@ -103,8 +102,7 @@ function Consorcios() {
                                     </Link>
                                 </td>
                                 <td>{consorcio.direccion}</td>
-                                <td>{consorcio.pisos}</td>
-                                <td>{consorcio.unidades}</td>
+                                {/* Eliminados los datos de Pisos y Unidades */}
                                 <td>
                                     {/* Botón para editar el consorcio */}
                                     <Link to={`/edit-consorcio/${consorcio._id}`} className="btn btn-warning btn-sm me-2">
