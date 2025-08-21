@@ -1,0 +1,23 @@
+{
+  "name": "Node.js & Python Environment",
+  "image": "mcr.microsoft.com/devcontainers/universal:latest",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/python:1": {}
+  },
+  "portsAttributes": {
+    "5000": {
+      "label": "API Backend",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "forwardPorts": [5000],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-node-azure-pack",
+        "ms-python.python"
+      ]
+    }
+  }
+}
