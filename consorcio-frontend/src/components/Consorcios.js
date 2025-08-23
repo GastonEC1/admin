@@ -10,7 +10,7 @@ function Consorcios() {
     const [error, setError] = useState('');
 
     // ¡VERIFICA ESTA URL! Debe ser la de tu puerto 5000 de Codespaces + /api/consorcios
-    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api/consorcios'; // Asegúrate que esta URL sea correcta para tu entorno
+    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api/consorcios'; // Asegúrate que esta URL sea correcta para tu entorno
     const token = localStorage.getItem('token');
 
     // Efecto para cargar los consorcios cuando el componente se monta
@@ -88,27 +88,22 @@ function Consorcios() {
                         <tr>
                             <th>Nombre</th>
                             <th>Dirección</th>
-                            {/* Eliminadas las columnas de Pisos y Unidades */}
-                            <th>Acciones</th> {/* Columna para los botones de acción */}
+                            <th>Acciones</th> 
                         </tr>
                     </thead>
                     <tbody>
                         {consorcios.map(consorcio => (
                             <tr key={consorcio._id}>
                                 <td>
-                                    {/* Enlace para ver los detalles del consorcio */}
                                     <Link to={`/consorcios/${consorcio._id}`}>
                                         {consorcio.nombre}
                                     </Link>
                                 </td>
                                 <td>{consorcio.direccion}</td>
-                                {/* Eliminados los datos de Pisos y Unidades */}
                                 <td>
-                                    {/* Botón para editar el consorcio */}
                                     <Link to={`/edit-consorcio/${consorcio._id}`} className="btn btn-warning btn-sm me-2">
                                         <FaEdit /> Editar
                                     </Link>
-                                    {/* Botón para eliminar el consorcio */}
                                     <Button 
                                         variant="danger" 
                                         size="sm" 

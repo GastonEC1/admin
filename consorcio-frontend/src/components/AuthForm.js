@@ -7,7 +7,7 @@ function AuthForm({ onAuth }) {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
-    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms';
+    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev';
 
     const handleSubmit = async (e) => {
         e.preventDefault();

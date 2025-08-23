@@ -8,7 +8,12 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 const corsOptions = {
-    origin: ['https://solid-umbrella-p4vr965jp5v39p96-3000.app.github.dev', 'http://localhost:3000'],
+    origin: [
+        // ¡IMPORTANTE! Asegúrate de que estas URLs coincidan con la de tu frontend.
+        // Si tu URL de frontend es 'https://tu-codespace-id-3000.app.github.dev', usa esa URL.
+        'https://refactored-xylophone-jv659gpjqq62jqr5-3000.app.github.dev', 
+        'http://localhost:3000'
+    ],
     optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
@@ -21,25 +26,26 @@ mongoose.connect(process.env.MONGODB_URI)
   })
   .catch(err => console.error('Error al conectar con la base de datos:', err));
 
-// Importar Modelos (si es necesario para otros fines aquí, aunque las rutas los importan)
-// const Consorcio = require('./models/consorcio');
-// const Inquilino = require('./models/inquilino');
-// const Activo = require('./models/activo');
-// const User = require('./models/user');
-
 // Importar Rutas
 const consorciosRouter = require('./routes/consorcios');
 const inquilinosRouter = require('./routes/inquilinos');
 const activosRouter = require('./routes/activos');
 const authRouter = require('./routes/auth'); 
-const emailRouter = require('./routes/email'); // ¡Nuevo!
+const emailRouter = require('./routes/email'); 
+const pagosRouter = require('./routes/pagos'); 
+const gastosRouter = require('./routes/gastos'); 
+const expensasRouter = require('./routes/expensas')
 
 // Usar Rutas
 app.use('/api/consorcios', consorciosRouter);
 app.use('/api/inquilinos', inquilinosRouter);
 app.use('/api/activos', activosRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/email', emailRouter); // ¡Nueva ruta para email!
+app.use('/api/email', emailRouter); 
+app.use('/api/pagos', pagosRouter);
+app.use('/api/gastos', gastosRouter);
+app.use('/api/expensas', expensasRouter); 
+
 
 // Ruta de bienvenida
 app.get('/', (req, res) => {

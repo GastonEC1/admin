@@ -13,6 +13,9 @@ import EditActivo from './components/EditActivos';
 import ActivoDetail from './components/ActivoDetail';
 import AddActivo from './components/AddActivo';
 import EditConsorcio from './components/EditConsorcio'
+import InquilinoDetail from './components/InquilinoDetail';
+import AddPago from './components/AddPago';
+
 function App() {
     // CAMBIA ESTO A 'false' CUANDO HABILITES EL LOGIN REALMENTE
     const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -41,8 +44,10 @@ function App() {
                             <Route path="/edit-activo/:id" element={<EditActivo></EditActivo>}/>
                             <Route path="/activos/:id" element={<ActivoDetail/>}/>
                             <Route path="/add-inquilino/:consorcioId" element={<AddInquilino/>} />
+                            <Route path="/inquilinos/:id" element={<InquilinoDetail />} /> 
                             <Route path="/add-activo/:consorcioId" element={<AddActivo />} />
                             <Route path="/edit-consorcio/:id" element={<EditConsorcio/>}/>
+                            <Route path="/add-pago/:consorcioId" element={<AddPago />} />
                         </Routes>
                     </Container>
                 </>

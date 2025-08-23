@@ -22,7 +22,7 @@ function AddActivo() {
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api';
+    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api';
     const token = localStorage.getItem('token');
 
     const [consorcioNombre, setConsorcioNombre] = useState('');
