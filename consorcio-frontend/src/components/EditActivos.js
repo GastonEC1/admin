@@ -153,27 +153,6 @@ function EditActivo() {
                     </Form.Select>
                 </Form.Group>
 
-                {/* Nuevos campos para el último mantenimiento y costo */}
-                <h5 className="mt-4">Información del Último Mantenimiento (Opcional)</h5>
-                <Form.Group className="mb-3" controlId="formUltimoCostoMantenimiento">
-                    <Form.Label>Costo del Último Mantenimiento ($)</Form.Label>
-                    <Form.Control 
-                        type="number" 
-                        step="0.01" 
-                        value={ultimoCostoMantenimiento} 
-                        onChange={(e) => setUltimoCostoMantenimiento(e.target.value)} 
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="formFechaUltimoMantenimiento">
-                    <Form.Label>Fecha del Último Mantenimiento</Form.Label>
-                    <Form.Control 
-                        type="date" 
-                        value={fechaUltimoMantenimiento} 
-                        onChange={(e) => setFechaUltimoMantenimiento(e.target.value)} 
-                    />
-                </Form.Group>
-
                 <Button variant="primary" type="submit" className="w-100 mt-3">
                     Actualizar Activo
                 </Button>

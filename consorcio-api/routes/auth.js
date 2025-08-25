@@ -1,28 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const authController = require('../controllers/authController');
+const authMiddleware = require('../middleware/auth'); // ✨ ¡Importamos la función de middleware!
 
-// Ruta para el inicio de sesión
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: 'Credenciales inválidas.' });
-        }
+// @route   POST /api/auth/register
+// @desc    Registrar un nuevo usuario
+// @access  Public
+router.post('/register', authController.registerUser);
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Credenciales inválidas.' });
-        }
+// @route   POST /api/auth/login
+// @desc    Autenticar usuario y obtener token
+// @access  Public
+router.post('/login', authController.loginUser);
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.status(200).json({ token });
-    } catch (err) {
-        res.status(500).json({ message: 'Error del servidor. Inténtalo de nuevo.' });
-    }
-});
+// @route   GET /api/auth/me
+// @desc    Obtener información del usuario autenticado
+// @access  Private (protegido por el middleware de autenticación)
+router.get('/me', authMiddleware, authController.getAuthenticatedUser); // ✨ Usamos 'authMiddleware' aquí
 
 module.exports = router;

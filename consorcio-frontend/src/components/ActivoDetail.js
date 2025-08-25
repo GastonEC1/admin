@@ -82,11 +82,7 @@ function ActivoDetail() {
             setEmailStatus({ type: 'danger', message: 'No se puede preparar la notificación. Falta el costo del último mantenimiento del activo.' });
             return;
         }
-        // VALIDACIÓN DE fechaUltimoMantenimiento ELIMINADA:
-        // if (activo.fechaUltimoMantenimiento === undefined || activo.fechaUltimoMantenimiento === null || activo.fechaUltimoMantenimiento === '') {
-        //     setEmailStatus({ type: 'danger', message: 'No se puede preparar la notificación. Falta la fecha del último mantenimiento del activo.' });
-        //     return;
-        // }
+        
         if (!activo.consorcio.inquilinos || activo.consorcio.inquilinos.length === 0) {
             setEmailStatus({ type: 'danger', message: 'El consorcio asociado no tiene inquilinos para enviar notificaciones.' });
             return;
@@ -197,10 +193,6 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                         <strong>Frecuencia de Mantenimiento:</strong> {activo.frecuenciaMantenimiento || 'N/A'}<br/>
                         <strong>Estado:</strong> {activo.estado || 'N/A'}<br/>
                         <hr/> 
-                        <h5>Último Mantenimiento y Costo:</h5>
-                        <strong>Costo:</strong> ${activo.ultimoCostoMantenimiento?.toFixed(2) || '0.00'}<br/> 
-                        <strong>Fecha:</strong> {formatFecha(activo.fechaUltimoMantenimiento)}<br/> 
-                        <strong>Consorcio:</strong> {activo.consorcio ? activo.consorcio.nombre : 'N/A'}
                     </Card.Text>
                     <div className="mt-3">
                         <Link to={`/edit-activo/${activo._id}`} className="btn btn-warning me-2">

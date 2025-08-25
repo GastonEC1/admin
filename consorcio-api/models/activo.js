@@ -48,6 +48,5 @@ const activoSchema = new mongoose.Schema({
     },
 });
 
-// --- ¡La corrección está aquí! ---
-// Exporta el modelo si ya existe, de lo contrario, compílalo y expórtalo.
+
 module.exports = mongoose.models.Activo || mongoose.model('Activo', activoSchema);

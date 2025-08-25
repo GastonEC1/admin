@@ -1,31 +1,40 @@
 import React from 'react';
-import { Navbar, Nav, Container, Button } from 'react-bootstrap';
-import { LinkContainer } from 'react-router-bootstrap';
-import { FaBuilding, FaSignOutAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { Navbar, Nav, Button, Container } from 'react-bootstrap';
+import { FaSignOutAlt, FaUserPlus, FaBuilding } from 'react-icons/fa'; // Importar iconos necesarios
 
-function AppNavbar({ onLogout }) {
-  return (
-    <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
-      <Container>
-        <Navbar.Brand as={LinkContainer} to="/">
-          <Nav.Link>Gestión de Consorcios</Nav.Link>
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            <LinkContainer to="/consorcios">
-              <Nav.Link><FaBuilding /> Consorcios</Nav.Link>
-            </LinkContainer>
-          </Nav>
-          <Nav>
-            <Button variant="outline-light" onClick={onLogout}>
-              <FaSignOutAlt /> Salir
-            </Button>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
-  );
+function AppNavbar({ onLogout, userName, userRole }) {
+    return (
+        <Navbar bg="dark" variant="dark" expand="lg" className="mb-4 shadow-lg">
+            <Container>
+                <Navbar.Brand as={Link} to="/">Gestión Consorcios</Navbar.Brand>
+                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                <Navbar.Collapse id="basic-navbar-nav">
+                    <Nav className="me-auto">
+                        <Nav.Link as={Link} to="/consorcios">
+                            <FaBuilding className="me-1" /> Consorcios
+                        </Nav.Link>
+                        
+                        {/* Enlace al registro de usuarios, solo si el rol es 'admin' */}
+                        {userRole === 'admin' && (
+                            <Nav.Link as={Link} to="/register">
+                                <FaUserPlus className="me-1" /> Registrar Usuario
+                            </Nav.Link>
+                        )}
+                        {/* Aquí puedes añadir otros enlaces condicionales por rol */}
+                    </Nav>
+                    <Nav>
+                        <Navbar.Text className="me-3 text-white-50">
+                            Bienvenido, <strong className="text-white">{userName}</strong> ({userRole || 'sin rol'})
+                        </Navbar.Text>
+                        <Button variant="outline-light" onClick={onLogout}>
+                            <FaSignOutAlt className="me-2" /> Cerrar Sesión
+                        </Button>
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
+    );
 }
 
 export default AppNavbar;
