@@ -1,230 +1,217 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Container, Spinner } from 'react-bootstrap'; // Importa Spinner
-import axios from 'axios';
-import AppNavbar from './components/Navbar.js';
-import AuthForm from './components/AuthForm.js'; // El formulario de Login
-import RegisterForm from './components/RegisterForm.jsx'; // El formulario de Registro (para administradores)
-import Consorcios from './components/Consorcios.js';
-import ConsorcioDetail from './components/ConsorcioDetail.js';
-import AddConsorcio from './components/AddConsorcio.js';
-import AddInquilino from './components/AddInquilinos.js';
-import EditInquilino from './components/EditInquilino.js';
-import InquilinoDetail from './components/InquilinoDetail.js';
-import AddActivo from './components/AddActivo.js';
-import ActivoDetail from './components/ActivoDetail.js';
-import EditActivo from './components/EditActivos.js';
-import EditConsorcio from './components/EditConsorcio.js';
-import AddPago from './components/AddPago.js';
+    import React, { useState, useEffect } from 'react';
+    import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+    import { Container, Spinner } from 'react-bootstrap';
+    import axios from 'axios';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './index.css'; // Asegúrate de que este archivo exista en 'src/' si lo necesitas
+    // Importaciones de componentes
+    // ¡Importante! Asegúrate de que los nombres de archivo en src/components/
+    // coincidan EXACTAMENTE con estas importaciones (ej. Navbar.js, AuthForm.js, RegisterForm.jsx)
+    import AppNavbar from './components/Navbar.js';
+    import AuthForm from './components/AuthForm.js';
+    import RegisterForm from './components/RegisterForm.jsx';
+    import Consorcios from './components/Consorcios.js';
+    import ConsorcioDetail from './components/ConsorcioDetail.js';
+    import AddConsorcio from './components/AddConsorcio.js';
+    import AddInquilino from './components/AddInquilinos.js';
+    import EditInquilino from './components/EditInquilino.js';
+    import InquilinoDetail from './components/InquilinoDetail.js';
+    import AddActivo from './components/AddActivo.js';
+    import ActivoDetail from './components/ActivoDetail.js';
+    import EditActivo from './components/EditActivos.js';
+    import EditConsorcio from './components/EditConsorcio.js';
+    import AddPago from './components/AddPago.js';
 
-// Puedes usar jwt-decode para obtener el rol directamente del token si lo necesitas en el frontend
-// import { jwtDecode } from 'jwt-decode';
+    import 'bootstrap/dist/css/bootstrap.min.css';
+    import './index.css';
 
-// ¡IMPORTANTE! VERIFICA ESTA URL. Debe ser la URL de tu backend en Codespaces, sin /api al final
-const API_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev';
+    const API_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev';
 
-// Importa todos tus componentes con la extensión .jsx
-// Asegúrate de que los nombres de archivo en tu carpeta 'src/components/' coincidan EXACTAMENTE
-// con estas importaciones (mayúsculas/minúsculas y extensión .jsx).
+    function AppContent() {
+        const [isAuthenticated, setIsAuthenticated] = useState(false);
+        const [userRole, setUserRole] = useState(null);
+        const [userName, setUserName] = useState('Invitado');
+        const [authLoading, setAuthLoading] = useState(true);
+        const navigate = useNavigate();
 
-// Componente App principal que contendrá la lógica de autenticación y rutas
-function AppContent() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userRole, setUserRole] = useState(null); // Para almacenar el rol del usuario
-    const [userName, setUserName] = useState('Invitado'); // Para mostrar el nombre en la navbar
-    const [authLoading, setAuthLoading] = useState(true); // Nuevo estado para el chequeo inicial de auth
-    const navigate = useNavigate(); // useNavigate debe usarse dentro de un componente envuelto en <Router>
+        useEffect(() => {
+            const checkAuth = async () => {
+                setAuthLoading(true);
+                const token = localStorage.getItem('authToken');
+                console.log(`[AppContent useEffect - checkAuth] INICIO. Path: ${window.location.pathname}`);
+                console.log(`[AppContent useEffect - checkAuth] Token en localStorage: ${token ? 'Encontrado' : 'No encontrado'}`);
 
-    // Efecto para verificar la autenticación al cargar la aplicación
-    useEffect(() => {
-        const checkAuth = async () => {
-            setAuthLoading(true); // Inicia la carga de autenticación
-            const token = localStorage.getItem('authToken'); // Usar 'authToken'
-            if (token) {
-                try {
-                    // Endpoint para obtener información del usuario autenticado y su rol
-                    const response = await axios.get(`${API_BASE_URL}/api/auth/me`, {
-                        headers: { 'x-auth-token': token }
-                    });
-                    setIsAuthenticated(true);
-                    setUserRole(response.data.rol); // El rol está en response.data.rol
-                    setUserName(response.data.nombre); // El nombre está en response.data.nombre
-                    localStorage.setItem('userRole', response.data.rol);
-                    localStorage.setItem('userName', response.data.nombre);
-                    // Si ya estamos logueados y en /login o /register, redirigir a consorcios
-                    if (window.location.pathname === '/login' || window.location.pathname === '/register') {
-                        navigate('/consorcios');
+                if (token) {
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/api/auth/me`, {
+                            headers: { 'x-auth-token': token }
+                        });
+                        console.log('[AppContent useEffect - checkAuth] Respuesta de /api/auth/me:', response.data);
+                        setIsAuthenticated(true);
+                        setUserRole(response.data.rol);
+                        setUserName(response.data.nombre);
+                        localStorage.setItem('userRole', response.data.rol);
+                        localStorage.setItem('userName', response.data.nombre);
+                        console.log(`[AppContent useEffect - checkAuth] Autenticado como: ${response.data.rol} (${response.data.nombre})`);
+
+                        if (window.location.pathname === '/login') {
+                            console.log('[AppContent useEffect - checkAuth] Usuario autenticado en /login, redirigiendo a /consorcios.');
+                            navigate('/consorcios', { replace: true });
+                        }
+                    } catch (err) {
+                        console.error('[AppContent useEffect - checkAuth] ERROR: Token inválido o expirado al verificar. Mensaje:', err.message);
+                        handleLogout(); // Esta función ya redirige a /login
                     }
-                } catch (err) {
-                    console.error('Token inválido o expirado:', err);
-                    localStorage.removeItem('authToken'); // Limpiar token inválido
-                    localStorage.removeItem('userName');
-                    localStorage.removeItem('userRole');
+                } else { // Usuario NO está autenticado
                     setIsAuthenticated(false);
                     setUserRole(null);
                     setUserName('Invitado');
-                    // Redirigir al login si el token es inválido
-                    if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-                        navigate('/login');
+                    localStorage.removeItem('userRole');
+                    localStorage.removeItem('userName');
+                    console.log('[AppContent useEffect - checkAuth] No se encontró token, usuario no autenticado.');
+
+                    if (window.location.pathname !== '/login' && window.location.pathname !== '/register') { // No redirigir si está en /register
+                        console.log('[AppContent useEffect - checkAuth] No autenticado y no en /login o /register, redirigiendo a /login.');
+                        navigate('/login', { replace: true });
                     }
                 }
-            } else {
-                setIsAuthenticated(false);
-                setUserRole(null);
-                setUserName('Invitado');
-                // Si no hay token y no estamos en /login o /register, redirigir al login
-                if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-                    navigate('/login');
-                }
-            }
-            setAuthLoading(false); // Finaliza la carga de autenticación
-        };
-        checkAuth();
-    }, [navigate]); // Añadir navigate a las dependencias para evitar warnings
+                setAuthLoading(false);
+                console.log(`[AppContent useEffect - checkAuth] FIN. isAuthenticated: ${isAuthenticated}, userRole: ${userRole}, authLoading: ${authLoading}`);
+            };
+            checkAuth();
+        }, [navigate, isAuthenticated, userRole]);
 
-    // Función para manejar el éxito del login
-    const handleAuthSuccess = async (token) => {
-        localStorage.setItem('authToken', token); // Guardar el token
-        try {
-            // Obtener el rol y el nombre del usuario después del login exitoso
-            const response = await axios.get(`${API_BASE_URL}/api/auth/me`, {
-                headers: { 'x-auth-token': token }
-            });
-            setIsAuthenticated(true);
-            setUserRole(response.data.rol);
-            setUserName(response.data.nombre);
-            localStorage.setItem('userName', response.data.nombre);
-            localStorage.setItem('userRole', response.data.rol);
-            navigate('/consorcios'); // ✨ ¡Redirigir a consorcios después del login exitoso!
-        } catch (err) {
-            console.error('Error al obtener datos del usuario después del login:', err);
+        const handleAuthSuccess = async (token) => {
+            localStorage.setItem('authToken', token);
+            console.log('[handleAuthSuccess] Login exitoso, token guardado. Verificando usuario...');
+            try {
+                const response = await axios.get(`${API_BASE_URL}/api/auth/me`, {
+                    headers: { 'x-auth-token': token }
+                });
+                console.log('[handleAuthSuccess] Datos de usuario obtenidos después de login:', response.data);
+                setIsAuthenticated(true);
+                setUserRole(response.data.rol);
+                setUserName(response.data.nombre);
+                localStorage.setItem('userName', response.data.nombre);
+                localStorage.setItem('userRole', response.data.rol);
+                console.log(`[handleAuthSuccess] Usuario logueado: ${response.data.rol} (${response.data.nombre}). Redirigiendo a /consorcios.`);
+                navigate('/consorcios', { replace: true });
+            } catch (err) {
+                console.error('[handleAuthSuccess] ERROR: Error al obtener datos de usuario después del login. Mensaje:', err.message);
+                handleLogout();
+                navigate('/login', { replace: true });
+            }
+        };
+
+        const handleLogout = () => {
+            console.log('[handleLogout] Cerrando sesión de usuario.');
             localStorage.removeItem('authToken');
             localStorage.removeItem('userName');
             localStorage.removeItem('userRole');
             setIsAuthenticated(false);
             setUserRole(null);
             setUserName('Invitado');
-            navigate('/login');
-        }
-    };
+            navigate('/login', { replace: true });
+        };
 
-    // Función para manejar el logout
-    const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userRole');
-        setIsAuthenticated(false);
-        setUserRole(null);
-        setUserName('Invitado');
-        navigate('/login'); // Redirigir al login después del logout
-    };
+        const ProtectedRoute = ({ children, roles }) => {
+            const currentPath = window.location.pathname;
+            console.log(`[ProtectedRoute] INICIO. Path: ${currentPath}, AuthLoading: ${authLoading}, IsAuthenticated: ${isAuthenticated}, UserRole: ${userRole}, Roles Requeridos: ${roles ? roles.join(', ') : 'Ninguno'}`);
 
-    // Componente auxiliar para rutas protegidas
-    const ProtectedRoute = ({ children, roles }) => {
-        // Muestra un spinner si la autenticación está cargando
+            if (authLoading) {
+                console.log('[ProtectedRoute] AuthLoading es true, mostrando spinner de carga.');
+                return (
+                    <Container className="text-center mt-5">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Cargando autenticación...</span>
+                        </Spinner>
+                    </Container>
+                );
+            }
+
+            if (!isAuthenticated) {
+                console.log(`[ProtectedRoute] Usuario NO autenticado en ${currentPath}, redirigiendo a /login.`);
+                navigate('/login', { replace: true });
+                return null; // No renderiza nada si no está autenticado
+            }
+
+            if (userRole === 'admin') {
+                console.log(`[ProtectedRoute] Usuario es 'admin', permitiendo acceso a ${currentPath}.`);
+                return children;
+            }
+
+            if (roles && roles.length > 0 && !roles.includes(userRole)) {
+                console.warn(`[ProtectedRoute] Acceso denegado para el rol '${userRole}' en ${currentPath}. Roles permitidos: [${roles.join(', ')}]. Redirigiendo a /consorcios.`);
+                navigate('/consorcios', { replace: true });
+                return null; // No renderiza nada si no tiene el rol
+            }
+
+            console.log(`[ProtectedRoute] Usuario con rol '${userRole}' tiene acceso a ${currentPath}.`);
+            return children;
+        };
+
+        // Spinner global mientras se carga la autenticación inicial
         if (authLoading) {
             return (
-                <Container className="text-center mt-5">
+                <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
                     <Spinner animation="border" role="status">
-                        <span className="visually-hidden">Cargando autenticación...</span>
+                        <span className="visually-hidden">Cargando aplicación...</span>
                     </Spinner>
-                </Container>
+                </div>
             );
         }
 
-        // Si no está autenticado, el useEffect ya debería haber redirigido a /login.
-        // Esto es una capa de seguridad.
-        if (!isAuthenticated) {
-            return null; // No renderizar nada, la redirección ya está en curso
-        }
-
-        // Si se especifican roles y el usuario no tiene ninguno de ellos, denegar acceso
-        if (roles && roles.length > 0 && !roles.includes(userRole)) {
-            alert('No tienes permiso para acceder a esta página.'); // Considera un modal custom en producción
-            navigate('/consorcios', { replace: true }); // Redirigir a una página accesible
-            return null; // No renderizar nada mientras redirige
-        }
-
-        return children;
-    };
-
-    // Muestra un spinner global mientras la autenticación inicial está cargando
-    if (authLoading) {
         return (
-            <Container className="text-center mt-5" style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Cargando aplicación...</span>
-                </Spinner>
-            </Container>
+            <>
+                {!isAuthenticated ? (
+                    <Routes>
+                        <Route path="/login" element={<AuthForm onAuthSuccess={handleAuthSuccess} API_BASE_URL={API_BASE_URL} />} />
+                        <Route path="*" element={<AuthForm onAuthSuccess={handleAuthSuccess} API_BASE_URL={API_BASE_URL} />} />
+                    </Routes>
+                ) : (
+                    <>
+                        <AppNavbar onLogout={handleLogout} userName={userName} userRole={userRole} />
+                        <Container fluid className="mt-3">
+                            <Routes>
+                                <Route
+                                    path="/register"
+                                    element={
+                                        <ProtectedRoute roles={['admin']}>
+                                            <RegisterForm API_BASE_URL={API_BASE_URL} />
+                                        </ProtectedRoute>
+                                    }
+                                />
+
+                                <Route path="/" element={<ProtectedRoute roles={['admin', 'propietario']}><Consorcios API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                                <Route path="/consorcios" element={<ProtectedRoute roles={['admin', 'propietario']}><Consorcios API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                                <Route path="/consorcios/:id" element={<ProtectedRoute roles={['admin', 'propietario']}><ConsorcioDetail API_BASE_URL={API_BASE_URL} userRole={userRole} userName={userName} /></ProtectedRoute>} />
+                                <Route path="/add-consorcio" element={<ProtectedRoute roles={['admin']}><AddConsorcio API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                                <Route path="/edit-consorcio/:id" element={<ProtectedRoute roles={['admin']}><EditConsorcio API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+
+                                <Route path="/add-inquilino/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']}><AddInquilino API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                                <Route path="/inquilinos/:id" element={<ProtectedRoute roles={['admin', 'employee', 'propietario']}><InquilinoDetail API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                                <Route path="/edit-inquilino/:id" element={<ProtectedRoute roles={['admin', 'employee']}><EditInquilino API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+
+                                <Route path="/add-activo/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']}><AddActivo API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                                <Route path="/activos/:id" element={<ProtectedRoute roles={['admin', 'employee', 'propietario']}><ActivoDetail API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                                <Route path="/edit-activo/:id" element={<ProtectedRoute roles={['admin', 'employee']}><EditActivo API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+
+                                <Route path="/add-pago/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']}><AddPago API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+
+                                <Route path="*" element={<ProtectedRoute roles={['admin', 'propietario']}><Consorcios API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                            </Routes>
+                        </Container>
+                    </>
+                )}
+            </>
         );
     }
 
-    return (
-        <>
-            {/* Si no está autenticado, solo muestra el formulario de login y registro */}
-            {!isAuthenticated ? (
-                <Routes>
-                    <Route path="/login" element={<AuthForm onAuthSuccess={handleAuthSuccess} />} />
-                    <Route path="/register" element={<RegisterForm />} /> {/* Ruta para registro de nuevos usuarios */}
-                    {/* Cualquier otra ruta no autenticada redirige a login */}
-                    <Route path="*" element={<AuthForm onAuthSuccess={handleAuthSuccess} />} />
-                </Routes>
-            ) : (
-                // Si está autenticado, muestra la barra de navegación y las rutas protegidas
-                <>
-                    <AppNavbar onLogout={handleLogout} userName={userName} userRole={userRole} />
-                    <Container fluid className="mt-3">
-                        <Routes>
-                            {/* Ruta para el registro de usuarios (solo para admins si está protegida) */}
-                            <Route
-                                path="/register"
-                                element={
-                                    <ProtectedRoute roles={['admin']}>
-                                        <RegisterForm />
-                                    </ProtectedRoute>
-                                }
-                            />
+    function App() {
+        return (
+            <Router>
+                <AppContent />
+            </Router>
+        );
+    }
 
-                            {/* Rutas de Inicio y Consorcios - Protegidas */}
-                            <Route path="/" element={<ProtectedRoute><Consorcios /></ProtectedRoute>} />
-                            <Route path="/consorcios" element={<ProtectedRoute><Consorcios /></ProtectedRoute>} />
-                            <Route path="/consorcios/:id" element={<ProtectedRoute><ConsorcioDetail /></ProtectedRoute>} />
-                            <Route path="/add-consorcio" element={<ProtectedRoute roles={['admin']}><AddConsorcio /></ProtectedRoute>} />
-                            <Route path="/edit-consorcio/:id" element={<ProtectedRoute roles={['admin']}><EditConsorcio /></ProtectedRoute>} />
-
-                            {/* Rutas para Inquilinos - Protegidas */}
-                            <Route path="/add-inquilino/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']}><AddInquilino /></ProtectedRoute>} />
-                            <Route path="/inquilinos/:id" element={<ProtectedRoute><InquilinoDetail /></ProtectedRoute>} />
-                            <Route path="/edit-inquilino/:id" element={<ProtectedRoute roles={['admin', 'employee']}><EditInquilino /></ProtectedRoute>} />
-
-                            {/* Rutas para Activos - Protegidas */}
-                            <Route path="/add-activo/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']}><AddActivo /></ProtectedRoute>} />
-                            <Route path="/activos/:id" element={<ProtectedRoute><ActivoDetail /></ProtectedRoute>} />
-                            <Route path="/edit-activo/:id" element={<ProtectedRoute roles={['admin', 'employee']}><EditActivo /></ProtectedRoute>} />
-
-                            {/* Rutas para Pagos - Protegidas */}
-                            <Route path="/add-pago/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']}><AddPago /></ProtectedRoute>} />
-
-                            {/* Ruta comodín para cualquier otra URL cuando está autenticado */}
-                            <Route path="*" element={<ProtectedRoute><Consorcios /></ProtectedRoute>} />
-                        </Routes>
-                    </Container>
-                </>
-            )}
-        </>
-    );
-}
-
-// Envolver AppContent en Router para que useNavigate funcione correctamente
-function App() {
-    return (
-        <Router>
-            <AppContent />
-        </Router>
-    );
-}
-
-export default App;
+    export default App;
