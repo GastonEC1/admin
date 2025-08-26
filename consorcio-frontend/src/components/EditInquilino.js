@@ -18,7 +18,7 @@ function EditInquilino() {
     const [errorMessage, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(true);
 
-    const backendBaseUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api';
+    const backendBaseUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api';
     const inquilinosBackendUrl = `${backendBaseUrl}/inquilinos`;
     const consorciosBackendUrl = `${backendBaseUrl}/consorcios`;
     const token = localStorage.getItem('token');

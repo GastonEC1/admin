@@ -15,7 +15,7 @@ function AddInquilino() {
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api';
+    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api';
     const token = localStorage.getItem('token');
 
     // Efecto para cargar el nombre del consorcio si se desea mostrar en el formulario (opcional)

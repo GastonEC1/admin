@@ -7,7 +7,7 @@ const Consorcio = require('../models/consorcio');
 router.get('/', async (req, res) => {
     try {
         const activos = await Activo.find().populate('consorcio');
-        res.json(actilos);
+        res.json(activos);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: 'Error del servidor al obtener activos.' });

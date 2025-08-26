@@ -9,7 +9,7 @@ function Activos() {
 
   useEffect(() => {
     // URL corregida a /api/activos (en plural)
-    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api/activos';
+    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api/activos';
     const token = localStorage.getItem('token');
 
     axios.get(backendUrl, {
