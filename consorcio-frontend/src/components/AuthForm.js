@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, Form, Button, Alert, Container, Row, Col, Spinner } from 'react-bootstrap';
 import { FaSignInAlt } from 'react-icons/fa'; 
 
-const BACKEND_BASE_URL = 'https://plhsk4j3-5000.brs.devtunnels.ms'; 
+const BACKEND_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev'; 
 
 const AuthForm = ({ onAuthSuccess }) => {
     const [email, setEmail] = useState('');

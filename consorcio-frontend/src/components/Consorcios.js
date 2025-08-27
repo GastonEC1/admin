@@ -10,7 +10,7 @@ function Consorcios() {
     const [error, setError] = useState('');
 
     // ¡VERIFICA ESTA URL! Debe ser la de tu puerto 5000 de Codespaces + /api/consorcios
-    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api/consorcios'; // Asegúrate que esta URL sea correcta para tu entorno
+    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api/consorcios'; // Asegúrate que esta URL sea correcta para tu entorno
     const token = localStorage.getItem('token');
 
     // Efecto para cargar los consorcios cuando el componente se monta

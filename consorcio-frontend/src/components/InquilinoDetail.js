@@ -13,7 +13,7 @@ function InquilinoDetail() {
     const [deleteSuccess, setDeleteSuccess] = useState('');
     const [deleteError, setDeleteError] = useState('');
 
-    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api/inquilinos'; 
+    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api/inquilinos'; 
     const token = localStorage.getItem('token');
 
     useEffect(() => {

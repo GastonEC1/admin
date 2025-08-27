@@ -20,7 +20,7 @@ function ActivoDetail() {
     const [emailBody, setEmailBody] = useState('');
     const [sendingEmail, setSendingEmail] = useState(false); // Estado para el botón de envío en el modal
 
-    const backendBaseUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api';
+    const backendBaseUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api';
     const activosBackendUrl = `${backendBaseUrl}/activos`;
     const emailBackendUrl = `${backendBaseUrl}/email/send-maintenance-notification`; 
     const token = localStorage.getItem('token');
