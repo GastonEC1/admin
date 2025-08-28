@@ -10,7 +10,7 @@ function Consorcios() {
     const [error, setError] = useState('');
 
     // ¡VERIFICA ESTA URL! Debe ser la de tu puerto 5000 de Codespaces + /api/consorcios
-    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api/consorcios'; // Asegúrate que esta URL sea correcta para tu entorno
+    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api/consorcios'; // Asegúrate que esta URL sea correcta para tu entorno
     const token = localStorage.getItem('token');
 
     // Efecto para cargar los consorcios cuando el componente se monta
@@ -79,7 +79,7 @@ function Consorcios() {
                 <h2>Lista de Consorcios ({consorcios.length})</h2>
                 {/* Botón para navegar al formulario de agregar consorcio */}
                 <Link to="/add-consorcio">
-                    <Button variant="primary">+ Agregar Consorcio</Button>
+                    <Button variant="outline-primary">+ Agregar Consorcio</Button>
                 </Link>
             </div>
             {consorcios.length > 0 ? (
@@ -101,11 +101,11 @@ function Consorcios() {
                                 </td>
                                 <td>{consorcio.direccion}</td>
                                 <td>
-                                    <Link to={`/edit-consorcio/${consorcio._id}`} className="btn btn-warning btn-sm me-2">
+                                    <Link to={`/edit-consorcio/${consorcio._id}`} className="btn btn-outline-primary btn-sm me-2">
                                         <FaEdit /> Editar
                                     </Link>
                                     <Button 
-                                        variant="danger" 
+                                        variant="outline-danger" 
                                         size="sm" 
                                         onClick={() => handleDelete(consorcio._id)}
                                     >

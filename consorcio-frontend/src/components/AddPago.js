@@ -30,7 +30,7 @@ function AddPago() {
     const [lastRegisteredPayment, setLastRegisteredPayment] = useState(null); // Para guardar el pago recién creado
     const [selectedInquilinoEmail, setSelectedInquilinoEmail] = useState(''); // Para guardar el email del inquilino seleccionado
 
-    const backendUrl = 'https://plhsk4j3-5000.brs.devtunnels.ms/api'; // ¡Actualiza con la URL de tu Codespace!
+    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api'; // ¡Actualiza con la URL de tu Codespace!
     const token = localStorage.getItem('token');
 
     // Cargar la lista de consorcios

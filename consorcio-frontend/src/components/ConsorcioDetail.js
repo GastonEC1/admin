@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Container, Card, Row, Col, ListGroup, Button, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
-import { FaUserPlus, FaBuilding, FaArrowLeft, FaEdit, FaTrash, FaInfoCircle, FaMoneyBillWave, FaTools } from 'react-icons/fa';
+import { Container, Card, Row, Col, ListGroup, Button, Alert, Spinner, Badge, Modal, Form } from 'react-bootstrap'; // Importa 'Form'
+import { FaUserPlus, FaArrowLeft, FaEdit, FaTrash, FaInfoCircle, FaMoneyBillWave, FaTools, FaSearch } from 'react-icons/fa'; // Importa 'FaSearch'
 
-// API_BASE_URL y userRole se reciben como props desde App.js
+
 function ConsorcioDetail({ API_BASE_URL, userRole }) {
     const { id } = useParams();
     const [consorcio, setConsorcio] = useState(null);
@@ -18,6 +18,11 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [itemTypeToDelete, setItemTypeToDelete] = useState('');
+
+    // Nuevo estado para el término de búsqueda de inquilinos
+    const [searchTerm, setSearchTerm] = useState('');
+    // Nuevo estado para los inquilinos filtrados
+    const [filteredInquilinos, setFilteredInquilinos] = useState([]);
 
     const fetchConsorcioDetails = useCallback(async () => {
         setLoading(true);
@@ -40,10 +45,12 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
             });
             setConsorcio(consorcioResponse.data);
 
+            // Se usa el filtro consorcioId para obtener solo los inquilinos de este consorcio
             const inquilinosResponse = await axios.get(`${API_BASE_URL}/api/inquilinos?consorcioId=${id}`, {
                 headers: { 'x-auth-token': token }
             });
-            setInquilinos(inquilinosResponse.data);
+            setInquilinos(inquilinosResponse.data); // Almacena todos los inquilinos
+            setFilteredInquilinos(inquilinosResponse.data); // Inicializa los filtrados con todos
 
             const activosResponse = await axios.get(`${API_BASE_URL}/api/activos?consorcioId=${id}`, {
                 headers: { 'x-auth-token': token }
@@ -68,12 +75,23 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
         fetchConsorcioDetails();
     }, [fetchConsorcioDetails]);
 
-    const handleDeleteClick = (item, type) => {
-        setItemToDelete(item);
-        setItemTypeToDelete(type);
-        setShowDeleteModal(true);
-    };
+    // Efecto para filtrar inquilinos cuando cambia el término de búsqueda o la lista original
+    useEffect(() => {
+        if (searchTerm === '') {
+            setFilteredInquilinos(inquilinos); // Si no hay término de búsqueda, muestra todos
+        } else {
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+            const filtered = inquilinos.filter(inquilino =>
+                inquilino.nombre.toLowerCase().includes(lowerCaseSearchTerm) ||
+                inquilino.unidad.toLowerCase().includes(lowerCaseSearchTerm) ||
+                (inquilino.email && inquilino.email.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (inquilino.telefono && inquilino.telefono.includes(lowerCaseSearchTerm))
+            );
+            setFilteredInquilinos(filtered);
+        }
+    }, [inquilinos, searchTerm]); // Se ejecuta cuando 'inquilinos' o 'searchTerm' cambian
 
+    
     const confirmDelete = async () => {
         if (!itemToDelete || !itemTypeToDelete) return;
 
@@ -196,18 +214,8 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                                     <ListGroup variant="flush">
                                         <ListGroup.Item><strong>Nombre:</strong> {consorcio.nombre}</ListGroup.Item>
                                         <ListGroup.Item><strong>Dirección:</strong> {consorcio.direccion}</ListGroup.Item>
-                                        <ListGroup.Item><strong>Código Postal:</strong> {consorcio.codigoPostal}</ListGroup.Item>
-                                        <ListGroup.Item><strong>Provincia:</strong> {consorcio.provincia}</ListGroup.Item>
                                         <ListGroup.Item><strong>Pisos:</strong> {consorcio.pisos}</ListGroup.Item>
                                         <ListGroup.Item><strong>Unidades:</strong> {consorcio.unidades}</ListGroup.Item>
-                                    </ListGroup>
-                                </Col>
-                                <Col md={6}>
-                                    <ListGroup variant="flush">
-                                        <ListGroup.Item><strong>Administrador:</strong> {consorcio.administrador}</ListGroup.Item>
-                                        <ListGroup.Item><strong>CUIT:</strong> {consorcio.cuit}</ListGroup.Item>
-                                        <ListGroup.Item><strong>Teléfono:</strong> {consorcio.telefono}</ListGroup.Item>
-                                        <ListGroup.Item><strong>Email:</strong> {consorcio.email || 'N/A'}</ListGroup.Item>
                                     </ListGroup>
                                 </Col>
                             </Row>
@@ -231,11 +239,25 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                                 </Button>
                             )}
                         </Card.Header>
+                        <Card.Body> 
+                            <Form.Group className="mb-3">
+                                <div className="input-group">
+                                    <span className="input-group-text"><FaSearch /></span>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Buscar inquilino por nombre, unidad, email o teléfono..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    <button className="btn btn-outline-secondary" onClick={() => setSearchTerm('')}>Limpiar</button>
+                                </div>
+                            </Form.Group>
+                        </Card.Body>
                         <ListGroup variant="flush">
-                            {inquilinos.length === 0 ? (
-                                <ListGroup.Item className="text-muted text-center py-3">No hay inquilinos registrados para este consorcio.</ListGroup.Item>
+                            {filteredInquilinos.length === 0 ? (
+                                <ListGroup.Item className="text-muted text-center py-3">No se encontraron inquilinos que coincidan con la búsqueda o no hay inquilinos registrados para este consorcio.</ListGroup.Item>
                             ) : (
-                                inquilinos.map(inquilino => (
+                                filteredInquilinos.map(inquilino => (
                                     <ListGroup.Item key={inquilino._id} className="d-flex justify-content-between align-items-center py-2">
                                         <div>
                                             {inquilino.nombre} ({inquilino.unidad})
@@ -244,24 +266,12 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                                             <Button as={Link} to={`/inquilinos/${inquilino._id}`} variant="outline-primary" size="sm" className="me-2" title="Ver detalles del inquilino">
                                                 <FaInfoCircle />
                                             </Button>
-                                            {(userRole === 'admin' || userRole === 'employee') && (
-                                                <>
-                                                    <Button as={Link} to={`/edit-inquilino/${inquilino._id}`} variant="outline-secondary" size="sm" className="me-2" title="Editar inquilino">
-                                                        <FaEdit />
-                                                    </Button>
-                                                    <Button variant="outline-danger" size="sm" onClick={() => handleDeleteClick(inquilino, 'inquilino')} title="Eliminar inquilino">
-                                                        <FaTrash />
-                                                    </Button>
-                                                </>
-                                            )}
                                         </div>
                                     </ListGroup.Item>
                                 ))
                             )}
                         </ListGroup>
                     </Card>
-
-                    {/* Sección para añadir pagos al consorcio (Gastos) - Color de encabezado cambiado */}
                     {(userRole === 'admin' || userRole === 'employee') && (
                         <Card className="shadow-sm border-0 h-auto">
                             <Card.Header as="h3" className="bg-light text-dark d-flex justify-content-between align-items-center">
@@ -276,10 +286,7 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                         </Card>
                     )}
                 </Col>
-
-                {/* Columna Derecha (4/12 - Activos y Alertas de Activos) */}
                 <Col md={4}>
-                    {/* Tarjeta de Activos - Color de encabezado cambiado */}
                     <Card className="shadow-sm border-0 mb-4 h-auto">
                         <Card.Header as="h3" className="bg-light text-dark d-flex justify-content-between align-items-center">
                             Activos
@@ -302,25 +309,13 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                                             </Link>
                                             {/* Se eliminó el botón de "Ver detalles" */}
                                         </div>
-                                        <div>
-                                            {(userRole === 'admin' || userRole === 'employee') && (
-                                                <>
-                                                    <Button as={Link} to={`/edit-activo/${activo._id}`} variant="outline-secondary" size="sm" className="me-2" title="Editar activo">
-                                                        <FaEdit />
-                                                    </Button>
-                                                    <Button variant="outline-danger" size="sm" onClick={() => handleDeleteClick(activo, 'activo')} title="Eliminar activo">
-                                                        <FaTrash />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
+                                       
                                     </ListGroup.Item>
                                 ))
                             )}
                         </ListGroup>
                     </Card>
 
-                    {/* Tarjeta para Alertas de Mantenimiento - Color de encabezado cambiado */}
                     <Card className="shadow-sm border-0 h-auto">
                         <Card.Header as="h3" className="bg-light text-dark p-3">
                             Alerta de activo
@@ -351,7 +346,6 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                 </Col>
             </Row>
 
-            {/* Modal de Confirmación de Eliminación */}
             <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirmar Eliminación</Modal.Title>

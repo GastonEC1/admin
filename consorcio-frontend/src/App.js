@@ -24,7 +24,7 @@ import React, { useState, useEffect } from 'react';
     import 'bootstrap/dist/css/bootstrap.min.css';
     import './index.css';
 
-    const API_BASE_URL = 'https://plhsk4j3-5000.brs.devtunnels.ms';
+    const API_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev';
 
     function AppContent() {
         const [isAuthenticated, setIsAuthenticated] = useState(false);
