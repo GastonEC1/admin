@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Container, Card, Row, Col, ListGroup, Button, Alert, Spinner, Badge, Modal, Form } from 'react-bootstrap'; // Importa 'Form'
-import { FaUserPlus, FaArrowLeft, FaEdit, FaTrash, FaInfoCircle, FaMoneyBillWave, FaTools, FaSearch } from 'react-icons/fa'; // Importa 'FaSearch'
-
+import { Container, Card, Row, Col, ListGroup, Button, Alert, Spinner, Badge, Modal, Form, Dropdown } from 'react-bootstrap';
+import {
+    FaUserPlus, FaArrowLeft, FaEdit, FaTrash, FaInfoCircle, FaMoneyBillWave, FaTools, FaSearch,
+     FaUserTie, FaEllipsisV, FaMapMarkerAlt, FaPhone, FaEnvelope
+} from 'react-icons/fa';
 
 function ConsorcioDetail({ API_BASE_URL, userRole }) {
     const { id } = useParams();
@@ -15,13 +17,12 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
     const [deleteMessage, setDeleteMessage] = useState(null);
     const navigate = useNavigate();
 
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [itemTypeToDelete, setItemTypeToDelete] = useState('');
+    const [deleting, setDeleting] = useState(false);
 
-    // Nuevo estado para el término de búsqueda de inquilinos
     const [searchTerm, setSearchTerm] = useState('');
-    // Nuevo estado para los inquilinos filtrados
     const [filteredInquilinos, setFilteredInquilinos] = useState([]);
 
     const fetchConsorcioDetails = useCallback(async () => {
@@ -39,18 +40,16 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
         }
 
         try {
-            // Se asume que API_BASE_URL no termina en /api
             const consorcioResponse = await axios.get(`${API_BASE_URL}/api/consorcios/${id}`, {
                 headers: { 'x-auth-token': token }
             });
             setConsorcio(consorcioResponse.data);
 
-            // Se usa el filtro consorcioId para obtener solo los inquilinos de este consorcio
             const inquilinosResponse = await axios.get(`${API_BASE_URL}/api/inquilinos?consorcioId=${id}`, {
                 headers: { 'x-auth-token': token }
             });
-            setInquilinos(inquilinosResponse.data); // Almacena todos los inquilinos
-            setFilteredInquilinos(inquilinosResponse.data); // Inicializa los filtrados con todos
+            setInquilinos(inquilinosResponse.data);
+            setFilteredInquilinos(inquilinosResponse.data);
 
             const activosResponse = await axios.get(`${API_BASE_URL}/api/activos?consorcioId=${id}`, {
                 headers: { 'x-auth-token': token }
@@ -75,10 +74,9 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
         fetchConsorcioDetails();
     }, [fetchConsorcioDetails]);
 
-    // Efecto para filtrar inquilinos cuando cambia el término de búsqueda o la lista original
     useEffect(() => {
         if (searchTerm === '') {
-            setFilteredInquilinos(inquilinos); // Si no hay término de búsqueda, muestra todos
+            setFilteredInquilinos(inquilinos);
         } else {
             const lowerCaseSearchTerm = searchTerm.toLowerCase();
             const filtered = inquilinos.filter(inquilino =>
@@ -89,25 +87,34 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
             );
             setFilteredInquilinos(filtered);
         }
-    }, [inquilinos, searchTerm]); // Se ejecuta cuando 'inquilinos' o 'searchTerm' cambian
+    }, [inquilinos, searchTerm]);
 
-    
+    const handleDeleteClick = (item, type) => {
+        setItemToDelete(item);
+        setItemTypeToDelete(type);
+        setShowDeleteConfirmModal(true);
+    };
+
     const confirmDelete = async () => {
         if (!itemToDelete || !itemTypeToDelete) return;
+
+        setDeleting(true);
+        setDeleteMessage(null);
+        setError(null);
 
         try {
             const token = localStorage.getItem('authToken');
             let endpoint = '';
-            let successMessage = '';
+            let successMsg = '';
 
             switch (itemTypeToDelete) {
                 case 'inquilino':
                     endpoint = `${API_BASE_URL}/api/inquilinos/${itemToDelete._id}`;
-                    successMessage = 'Inquilino eliminado exitosamente.';
+                    successMsg = 'Inquilino eliminado exitosamente.';
                     break;
                 case 'activo':
                     endpoint = `${API_BASE_URL}/api/activos/${itemToDelete._id}`;
-                    successMessage = 'Activo eliminado exitosamente.';
+                    successMsg = 'Activo eliminado exitosamente.';
                     break;
                 default:
                     throw new Error('Tipo de ítem desconocido para eliminar.');
@@ -117,13 +124,14 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                 headers: { 'x-auth-token': token }
             });
 
-            setDeleteMessage(successMessage);
+            setDeleteMessage({ type: 'success', message: successMsg });
             fetchConsorcioDetails();
             setTimeout(() => setDeleteMessage(null), 3000);
         } catch (err) {
             setError(err.response?.data?.msg || `Error al eliminar el ${itemTypeToDelete}.`);
         } finally {
-            setShowDeleteModal(false);
+            setDeleting(false);
+            setShowDeleteConfirmModal(false);
             setItemToDelete(null);
             setItemTypeToDelete('');
         }
@@ -188,58 +196,77 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
 
     return (
         <Container className="my-5">
-            <Button variant="secondary" onClick={() => navigate('/consorcios')} className="mb-4">
+            <Button variant="outline-secondary" onClick={() => navigate('/consorcios')} className="mb-4">
                 <FaArrowLeft className="me-2" /> Volver a Consorcios
             </Button>
 
-            {deleteMessage && <Alert variant="success">{deleteMessage}</Alert>}
+            {deleteMessage && <Alert variant={deleteMessage.type}>{deleteMessage.message}</Alert>}
+            {error && <Alert variant="danger">{error}</Alert>}
 
-            {/* Fila principal para dividir en dos grandes secciones */}
             <Row className="g-4">
                 {/* Columna Izquierda (8/12 - Información del Consorcio, Inquilinos y Gestión de Pagos) */}
                 <Col md={8}>
-                    {/* Tarjeta de Información del Consorcio - Color de encabezado cambiado */}
-                    <Card className="shadow-lg mb-4 border-0">
-                        <Card.Header as="h2" className="text-center bg-light text-dark p-3">
-                            Información del consorcio
-                            {(userRole === 'admin' || userRole === 'employee') && (
-                                <Link to={`/edit-consorcio/${consorcio._id}`} className="btn btn-outline-secondary btn-sm float-end" title="Editar Consorcio">
-                                    <FaEdit /> Editar
-                                </Link>
-                            )}
-                        </Card.Header>
-                        <Card.Body>
-                            <Row>
-                                <Col md={6}>
-                                    <ListGroup variant="flush">
-                                        <ListGroup.Item><strong>Nombre:</strong> {consorcio.nombre}</ListGroup.Item>
-                                        <ListGroup.Item><strong>Dirección:</strong> {consorcio.direccion}</ListGroup.Item>
-                                        <ListGroup.Item><strong>Pisos:</strong> {consorcio.pisos}</ListGroup.Item>
-                                        <ListGroup.Item><strong>Unidades:</strong> {consorcio.unidades}</ListGroup.Item>
-                                    </ListGroup>
+                    {/* Tarjeta Principal de Información del Consorcio */}
+                    <Card className="shadow-lg mb-4 border-0 rounded-4">
+                        <Card.Body className="p-4">
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h1 className="mb-1 text-primary">{consorcio.nombre}</h1>
+                                    <p className="lead text-muted"><FaMapMarkerAlt className="me-2" />{consorcio.direccion}</p>
+                                </div>
+                                {(userRole === 'admin' || userRole === 'employee') && (
+                                    <Link to={`/edit-consorcio/${consorcio._id}`} className="btn btn-outline-secondary btn-sm" title="Editar Consorcio">
+                                        <FaEdit className="me-1" /> Editar
+                                    </Link>
+                                )}
+                            </div>
+
+                            <Row className="text-center mb-4 g-2">
+                                <Col xs={6} md={4}>
+                                    <div className="bg-light p-3 rounded-3 shadow-sm d-flex flex-column align-items-center justify-content-center h-100">
+                                        {/* Icono de edificio eliminado */}
+                                        <h5 className="mb-0 text-primary">{consorcio.pisos}</h5> {/* Texto en color primario */}
+                                        <small className="text-muted">Pisos</small>
+                                    </div>
                                 </Col>
+                                <Col xs={6} md={4}>
+                                    <div className="bg-light p-3 rounded-3 shadow-sm d-flex flex-column align-items-center justify-content-center h-100">
+                                        {/* Icono de hogar eliminado */}
+                                        <h5 className="mb-0 text-primary">{consorcio.unidades}</h5> {/* Texto en color primario */}
+                                        <small className="text-muted">Unidades</small>
+                                    </div>
+                                </Col>
+                                <Col md={4} className="d-none d-md-block"></Col>
                             </Row>
-                            <hr className="my-3" />
-                            <h5 className="mb-3">Información del Portero:</h5>
-                            <Card.Text>
-                                <strong>Nombre:</strong> {consorcio.nombrePortero || 'N/A'}<br/>
-                                <strong>Teléfono:</strong> {consorcio.telefonoPortero || 'N/A'}<br/>
-                                <strong>Email:</strong> {consorcio.emailPortero || 'N/A'}<br/>
-                            </Card.Text>
+
+                            <hr className="my-4" />
+
+                            <h5 className="mb-3 d-flex align-items-center text-primary"><FaUserTie className="me-2" /> Información del Portero:</h5>
+                            <ListGroup variant="flush" className="border-0 bg-transparent">
+                                <ListGroup.Item className="bg-transparent border-0 py-1 px-0 d-flex align-items-center">
+                                    <strong className="me-2">Nombre:</strong> {consorcio.nombrePortero || 'N/A'}
+                                </ListGroup.Item>
+                                <ListGroup.Item className="bg-transparent border-0 py-1 px-0 d-flex align-items-center">
+                                    <FaPhone className="text-muted me-2" /> {consorcio.telefonoPortero || 'N/A'}
+                                </ListGroup.Item>
+                                <ListGroup.Item className="bg-transparent border-0 py-1 px-0 d-flex align-items-center">
+                                    <FaEnvelope className="text-muted me-2" /> {consorcio.emailPortero || 'N/A'}
+                                </ListGroup.Item>
+                            </ListGroup>
                         </Card.Body>
                     </Card>
 
-                    {/* Tarjeta de Inquilinos - Color de encabezado cambiado */}
-                    <Card className="shadow-sm border-0 mb-4 h-auto">
-                        <Card.Header as="h3" className="bg-light text-dark d-flex justify-content-between align-items-center">
-                            Inquilino
+                    {/* Tarjeta de Inquilinos */}
+                    <Card className="shadow-sm border-0 mb-4 h-auto rounded-4">
+                        <Card.Header as="h4" className="bg-primary text-white p-3 d-flex justify-content-between align-items-center rounded-top-4">
+                            Inquilinos
                             {(userRole === 'admin' || userRole === 'employee') && (
-                                <Button as={Link} to={`/add-inquilino/${consorcio._id}`} variant="outline-secondary" size="sm" title="Añadir Inquilino">
-                                    <FaUserPlus /> Añadir
+                                <Button as={Link} to={`/add-inquilino/${consorcio._id}`} variant="light" size="sm" title="Añadir Inquilino">
+                                    <FaUserPlus className="me-1" /> Añadir
                                 </Button>
                             )}
                         </Card.Header>
-                        <Card.Body> 
+                        <Card.Body>
                             <Form.Group className="mb-3">
                                 <div className="input-group">
                                     <span className="input-group-text"><FaSearch /></span>
@@ -249,7 +276,11 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
-                                    <button className="btn btn-outline-secondary" onClick={() => setSearchTerm('')}>Limpiar</button>
+                                    {searchTerm && (
+                                        <Button variant="outline-secondary" onClick={() => setSearchTerm('')} title="Limpiar búsqueda">
+                                            &times;
+                                        </Button>
+                                    )}
                                 </div>
                             </Form.Group>
                         </Card.Body>
@@ -258,41 +289,57 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                                 <ListGroup.Item className="text-muted text-center py-3">No se encontraron inquilinos que coincidan con la búsqueda o no hay inquilinos registrados para este consorcio.</ListGroup.Item>
                             ) : (
                                 filteredInquilinos.map(inquilino => (
-                                    <ListGroup.Item key={inquilino._id} className="d-flex justify-content-between align-items-center py-2">
+                                    <ListGroup.Item key={inquilino._id} className="d-flex justify-content-between align-items-center py-2 px-3 border-bottom-0 border-start-0 border-end-0">
                                         <div>
-                                            {inquilino.nombre} ({inquilino.unidad})
+                                            <strong>{inquilino.nombre}</strong> ({inquilino.unidad})
+                                            {inquilino.email && <div className="text-muted small">{inquilino.email}</div>}
                                         </div>
                                         <div>
-                                            <Button as={Link} to={`/inquilinos/${inquilino._id}`} variant="outline-primary" size="sm" className="me-2" title="Ver detalles del inquilino">
-                                                <FaInfoCircle />
-                                            </Button>
+                                            <Dropdown align="end">
+                                                <Dropdown.Toggle variant="outline-secondary" size="sm" id={`dropdown-inquilino-actions-${inquilino._id}`}>
+                                                    <FaEllipsisV />
+                                                </Dropdown.Toggle>
+                                                <Dropdown.Menu>
+                                                    <Dropdown.Item as={Link} to={`/inquilinos/${inquilino._id}`}><FaInfoCircle className="me-2" /> Ver Detalles</Dropdown.Item>
+                                                    {(userRole === 'admin' || userRole === 'employee') && (
+                                                        <>
+                                                            
+                                                            <Dropdown.Item onClick={() => handleDeleteClick(inquilino, 'inquilino')} className="text-danger"><FaTrash className="me-2" /> Eliminar</Dropdown.Item>
+                                                        </>
+                                                    )}
+                                                </Dropdown.Menu>
+                                            </Dropdown>
                                         </div>
                                     </ListGroup.Item>
                                 ))
                             )}
                         </ListGroup>
                     </Card>
+
+                    {/* Sección para añadir pagos al consorcio (Gastos) */}
                     {(userRole === 'admin' || userRole === 'employee') && (
-                        <Card className="shadow-sm border-0 h-auto">
-                            <Card.Header as="h3" className="bg-light text-dark d-flex justify-content-between align-items-center">
+                        <Card className="shadow-sm border-0 h-auto rounded-4">
+                            <Card.Header as="h4" className="bg-primary text-white p-3 d-flex justify-content-between align-items-center rounded-top-4">
                                 Gastos
                             </Card.Header>
                             <Card.Body className="text-center py-4">
                                 <p>Registra un nuevo pago asociado a este consorcio.</p>
-                                <Button as={Link} to={`/add-pago/${consorcio._id}`} variant="dark" size="lg">
+                                <Button as={Link} to={`/add-pago/${consorcio._id}`} variant="dark" size="lg" className="rounded-pill shadow">
                                     <FaMoneyBillWave className="me-2" /> Registrar Nuevo Pago
                                 </Button>
                             </Card.Body>
                         </Card>
                     )}
                 </Col>
+
                 <Col md={4}>
-                    <Card className="shadow-sm border-0 mb-4 h-auto">
-                        <Card.Header as="h3" className="bg-light text-dark d-flex justify-content-between align-items-center">
+                    {/* Tarjeta de Activos */}
+                    <Card className="shadow-sm border-0 mb-4 h-auto rounded-4">
+                        <Card.Header as="h4" className="bg-primary text-white p-3 d-flex justify-content-between align-items-center rounded-top-4">
                             Activos
                             {(userRole === 'admin' || userRole === 'employee') && (
-                                <Button as={Link} to={`/add-activo/${consorcio._id}`} variant="outline-secondary" size="sm" title="Añadir Activo">
-                                    <FaTools /> Añadir
+                                <Button as={Link} to={`/add-activo/${consorcio._id}`} variant="light" size="sm" title="Añadir Activo">
+                                    <FaTools className="me-1" /> Añadir
                                 </Button>
                             )}
                         </Card.Header>
@@ -301,24 +348,25 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                                 <ListGroup.Item className="text-muted text-center py-3">No hay activos registrados para este consorcio.</ListGroup.Item>
                             ) : (
                                 activos.map(activo => (
-                                    <ListGroup.Item key={activo._id} className="d-flex justify-content-between align-items-center py-2">
+                                    <ListGroup.Item key={activo._id} className="d-flex justify-content-between align-items-center py-2 px-3 border-bottom-0 border-start-0 border-end-0">
                                         <div className="d-flex align-items-center flex-wrap">
-                                            {/* *** CAMBIO CLAVE AQUÍ: El nombre del activo es ahora un enlace directo a su detalle *** */}
                                             <Link to={`/activos/${activo._id}`} className="text-decoration-none text-dark fw-bold me-2">
                                                 {activo.nombre} ({activo.tipo})
                                             </Link>
-                                            {/* Se eliminó el botón de "Ver detalles" */}
+                                            <Badge bg={getMaintenanceStatus(activo.proximoMantenimiento).color} className="ms-2">
+                                                {getMaintenanceStatus(activo.proximoMantenimiento).text}
+                                            </Badge>
                                         </div>
-                                       
                                     </ListGroup.Item>
                                 ))
                             )}
                         </ListGroup>
                     </Card>
 
-                    <Card className="shadow-sm border-0 h-auto">
-                        <Card.Header as="h3" className="bg-light text-dark p-3">
-                            Alerta de activo
+                    {/* Tarjeta para Alertas de Mantenimiento */}
+                    <Card className="shadow-sm border-0 h-auto rounded-4">
+                        <Card.Header as="h4" className="bg-primary text-white p-3 d-flex justify-content-between align-items-center rounded-top-4">
+                            Alertas de Mantenimiento
                         </Card.Header>
                         <ListGroup variant="flush">
                             {activos.filter(activo => getMaintenanceStatus(activo.proximoMantenimiento).color === 'danger' || getMaintenanceStatus(activo.proximoMantenimiento).color === 'warning').length === 0 ? (
@@ -332,8 +380,8 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                                     .map(activo => {
                                         const status = getMaintenanceStatus(activo.proximoMantenimiento);
                                         return (
-                                            <ListGroup.Item key={activo._id} className="d-flex justify-content-between align-items-center py-2">
-                                                <span>{activo.nombre}:</span>
+                                            <ListGroup.Item key={activo._id} className="d-flex justify-content-between align-items-center py-2 px-3 border-bottom-0 border-start-0 border-end-0">
+                                                <span><strong>{activo.nombre}:</strong></span>
                                                 <Badge bg={status.color} className="ms-auto">
                                                     {status.text}
                                                 </Badge>
@@ -346,19 +394,24 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                 </Col>
             </Row>
 
-            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+            <Modal show={showDeleteConfirmModal} onHide={() => setShowDeleteConfirmModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirmar Eliminación</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    ¿Estás seguro de que deseas eliminar este {itemTypeToDelete}? Esta acción es irreversible.
+                    ¿Estás seguro de que deseas eliminar el {itemTypeToDelete} "<strong>{itemToDelete ? (itemToDelete.nombre || itemToDelete.marca || 'elemento') : 'este elemento'}</strong>"? Esta acción es irreversible.
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                    <Button variant="secondary" onClick={() => setShowDeleteConfirmModal(false)} disabled={deleting}>
                         Cancelar
                     </Button>
-                    <Button variant="danger" onClick={confirmDelete}>
-                        Eliminar
+                    <Button variant="danger" onClick={confirmDelete} disabled={deleting}>
+                        {deleting ? (
+                            <>
+                                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                                Eliminando...
+                            </>
+                        ) : 'Eliminar'}
                     </Button>
                 </Modal.Footer>
             </Modal>
