@@ -3,10 +3,19 @@ const router = express.Router();
 const Inquilino = require('../models/inquilino');
 const Consorcio = require('../models/consorcio'); // Necesario para actualizar el consorcio
 
-// Obtener todos los inquilinos (opcional, para una vista general)
+// Obtener todos los inquilinos, con filtro opcional por consorcioId
 router.get('/', async (req, res) => {
     try {
-        const inquilinos = await Inquilino.find().populate('consorcio');
+        const { consorcioId } = req.query; // Extraemos consorcioId de los parámetros de consulta
+
+        let query = {}; // Objeto de consulta vacío por defecto
+
+        // Si se proporciona consorcioId, añadimos la condición al objeto de consulta
+        if (consorcioId) {
+            query.consorcio = consorcioId; // Filtramos por el ID del consorcio
+        }
+
+        const inquilinos = await Inquilino.find(query).populate('consorcio');
         res.json(inquilinos);
     } catch (err) {
         console.error(err.message);
@@ -142,38 +151,6 @@ router.delete('/:id', async (req, res) => {
         }
 
         res.json({ msg: 'Inquilino eliminado con éxito' });
-    } catch (err) {
-        console.error(err.message);
-        if (err.kind === 'ObjectId') {
-            return res.status(400).json({ msg: 'ID de inquilino no válido para eliminación.' });
-        }
-        res.status(500).send('Error del servidor al eliminar inquilino.');
-    }
-});
-
-router.delete('/:id', async (req, res) => {
-    try {
-        let inquilino = await Inquilino.findById(req.params.id);
-
-        if (!inquilino) {
-            return res.status(404).json({ msg: 'Inquilino no encontrado para eliminar.' });
-        }
-
-        const consorcioId = inquilino.consorcio;
-
-        // Eliminar el inquilino de la base de datos
-        await Inquilino.findByIdAndDelete(req.params.id);
-
-        // Desasociar el inquilino del consorcio al que pertenecía
-        if (consorcioId) {
-            await Consorcio.findByIdAndUpdate(
-                consorcioId,
-                { $pull: { inquilinos: req.params.id } }, // Usa $pull para remover el ID del array
-                { new: true, useFindAndModify: false }
-            );
-        }
-
-        res.json({ msg: 'Inquilino eliminado con éxito.' });
     } catch (err) {
         console.error(err.message);
         if (err.kind === 'ObjectId') {

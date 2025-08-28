@@ -79,7 +79,7 @@ function Consorcios() {
                 <h2>Lista de Consorcios ({consorcios.length})</h2>
                 {/* Botón para navegar al formulario de agregar consorcio */}
                 <Link to="/add-consorcio">
-                    <Button variant="primary">+ Agregar Consorcio</Button>
+                    <Button variant="outline-primary">+ Agregar Consorcio</Button>
                 </Link>
             </div>
             {consorcios.length > 0 ? (
@@ -101,11 +101,11 @@ function Consorcios() {
                                 </td>
                                 <td>{consorcio.direccion}</td>
                                 <td>
-                                    <Link to={`/edit-consorcio/${consorcio._id}`} className="btn btn-warning btn-sm me-2">
+                                    <Link to={`/edit-consorcio/${consorcio._id}`} className="btn btn-outline-primary btn-sm me-2">
                                         <FaEdit /> Editar
                                     </Link>
                                     <Button 
-                                        variant="danger" 
+                                        variant="outline-danger" 
                                         size="sm" 
                                         onClick={() => handleDelete(consorcio._id)}
                                     >
