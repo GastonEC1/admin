@@ -18,4 +18,5 @@ router.post('/login', authController.loginUser);
 // @access  Private (protegido por el middleware de autenticación)
 router.get('/me', authMiddleware, authController.getAuthenticatedUser); // ✨ Usamos 'authMiddleware' aquí
 
+router.get('/login-history',authMiddleware, authController.getLoginHistory);
 module.exports = router;
