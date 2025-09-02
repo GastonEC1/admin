@@ -15,13 +15,17 @@ function AppNavbar({ onLogout, userName, userRole }) {
                             <FaBuilding className="me-1" /> Consorcios
                         </Nav.Link>
                         
-                        {/* Enlace al registro de usuarios, solo si el rol es 'admin' */}
+
                         {userRole === 'admin' && (
                             <Nav.Link as={Link} to="/register">
                                 <FaUserPlus className="me-1" /> Registrar Usuario
                             </Nav.Link>
                         )}
-                        {/* Aquí puedes añadir otros enlaces condicionales por rol */}
+                        {userRole === 'admin' && (
+                            <Nav.Link as={Link} to="/login-map">
+                                <FaUserPlus className="me-1" /> Mapa de Inicios de Sesión
+                            </Nav.Link>
+                        )}
                     </Nav>
                     <Nav>
                         <Navbar.Text className="me-3 text-white-50">

@@ -1,23 +1,26 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config(); // Asegúrate de cargar las variables de entorno
+require('dotenv').config();
 
 // Middleware para verificar el token JWT
 module.exports = function (req, res, next) {
-    // Obtener el token del header
-    const token = req.header('x-auth-token');
+    // Obtener el token del encabezado 'Authorization'
+    const authHeader = req.header('Authorization');
 
-    // Verificar si no hay token
-    if (!token) {
+    // Verificar si no hay token en el encabezado
+    if (!authHeader) {
         return res.status(401).json({ msg: 'No hay token, autorización denegada' });
     }
 
+    // Separar "Bearer" del token real
+    const token = authHeader.split(' ')[1];
+
     try {
-        // Verificar el token
+        // Verificar y decodificar el token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Adjuntar el usuario al objeto de solicitud
+        // Adjuntar el usuario al objeto de la solicitud
         req.user = decoded.user;
-        next(); // Pasar al siguiente middleware o ruta
+        next(); // Continuar con la siguiente función de la ruta
     } catch (err) {
         res.status(401).json({ msg: 'Token no válido' });
     }
