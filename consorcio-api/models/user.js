@@ -20,7 +20,7 @@ const UserSchema = new mongoose.Schema({
     rol: { // Para futuros roles de usuario (administrador, portero, etc.)
         type: String,
         enum: ['admin', 'employee', 'owner'], // Ejemplos de roles
-        default: 'admin' // Rol por defecto
+        default: true // Rol por defecto
     },
     fechaRegistro: {
         type: Date,
