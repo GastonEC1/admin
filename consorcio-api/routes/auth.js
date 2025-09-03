@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const authMiddleware = require('../middleware/auth'); // ✨ ¡Importamos la función de middleware!
+const authMiddleware = require('../middleware/auth');
+const adminMiddleware = require('../middleware/admin');
 
 // @route   POST /api/auth/register
 // @desc    Registrar un nuevo usuario
 // @access  Public
-router.post('/register', authController.registerUser);
+router.post('/register', authMiddleware, adminMiddleware, authController.registerUser);
 
 // @route   POST /api/auth/login
 // @desc    Autenticar usuario y obtener token

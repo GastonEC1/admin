@@ -5,44 +5,47 @@ const LoginHistory = require("../models/loginHistory");
 const axios = require("axios");
 
 exports.registerUser = async (req, res) => {
-  const { nombre, email, password } = req.body;
+    // ✨ Obtén el rol de la solicitud
+    const { nombre, email, password, rol } = req.body;
 
-  try {
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ msg: "El usuario ya existe" });
+    try {
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ msg: "El usuario ya existe" });
+        }
+
+        user = new User({
+            nombre,
+            email,
+            password,
+            rol, // ✨ Añade el rol aquí
+        });
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+
+        await user.save();
+
+        const payload = {
+            user: {
+                id: user.id,
+                rol: user.rol,
+            },
+        };
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" },
+            (err, token) => {
+                if (err) throw err;
+                res.json({ token });
+            }
+        );
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Error en el servidor");
     }
-
-    user = new User({
-      nombre,
-      email,
-      password,
-    });
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-
-    await user.save();
-
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
-
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token });
-      }
-    );
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Error en el servidor");
-  }
 };
 
 exports.loginUser = async (req, res) => {
@@ -88,6 +91,7 @@ exports.loginUser = async (req, res) => {
     const payload = {
       user: {
         id: user.id,
+        rol: user.rol 
       },
     };
 
