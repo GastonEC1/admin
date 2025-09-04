@@ -37,7 +37,7 @@ router.get('/:id', async (req, res) => {
 
 // Crear un nuevo consorcio
 router.post('/', async (req, res) => {
-    // Campos actualizados, sin horarioPortero, fechaFundacion, gastosMensualesEstimados, fondoReserva
+   
     const { nombre, direccion, pisos, unidades, nombrePortero, telefonoPortero, emailPortero } = req.body;
     try {
         const nuevoConsorcio = await Consorcio.create({
@@ -48,7 +48,7 @@ router.post('/', async (req, res) => {
             nombrePortero, 
             telefonoPortero, 
             emailPortero 
-            // fechaFundacion, gastosMensualesEstimados, fondoReserva ya no se incluyen
+    
         });
         res.status(201).json(nuevoConsorcio);
     } catch (err) {
@@ -59,7 +59,7 @@ router.post('/', async (req, res) => {
 
 // Actualizar un consorcio por ID
 router.put('/:id', async (req, res) => {
-    // Campos actualizados, sin horarioPortero, fechaFundacion, gastosMensualesEstimados, fondoReserva
+ 
     const { nombre, direccion, pisos, unidades, nombrePortero, telefonoPortero, emailPortero } = req.body;
     try {
         let consorcio = await Consorcio.findById(req.params.id);
@@ -76,9 +76,7 @@ router.put('/:id', async (req, res) => {
         consorcio.nombrePortero = nombrePortero;
         consorcio.telefonoPortero = telefonoPortero;
         consorcio.emailPortero = emailPortero;
-        // horarioPortero ya no se actualiza
 
-        // fechaFundacion, gastosMensualesEstimados, fondoReserva ya no se actualizan
         
         await consorcio.save();
         res.json(consorcio);
