@@ -79,7 +79,6 @@ router.post('/send-maintenance-notification', async (req, res) => {
             ${activo.descripcion ? `<p>Descripción del activo: ${activo.descripcion}</p>` : ''}
             <p>Fecha de Mantenimiento: <strong>${fechaFormateada}</strong></p>
             <p>Costo Asociado: <strong>${costoFormateado}</strong></p>
-            <p>Este costo se incluirá en sus próximas expensas. Para más detalles, por favor, revise el historial de gastos.</p>
             <p>Atentamente,<br/>La Administración del Consorcio "<strong>${consorcio.nombre}</strong>"</p>
         `;
 

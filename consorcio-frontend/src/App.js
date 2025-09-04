@@ -5,17 +5,16 @@ import axios from 'axios';
 import AppNavbar from './components/Navbar.js';
 import AuthForm from './components/AuthForm.js';
 import RegisterForm from './components/RegisterForm.jsx';
-import Consorcios from './components/Consorcios.js';
-import ConsorcioDetail from './components/ConsorcioDetail.js';
-import AddConsorcio from './components/AddConsorcio.js';
-import AddInquilino from './components/AddInquilinos.js';
-import EditInquilino from './components/EditInquilino.js';
-import InquilinoDetail from './components/InquilinoDetail.js';
-import AddActivo from './components/AddActivo.js';
-import ActivoDetail from './components/ActivoDetail.js';
-import EditActivo from './components/EditActivos.js';
-import EditConsorcio from './components/EditConsorcio.js';
-import AddPago from './components/AddPago.js';
+import Consorcios from './components/consorcio/Consorcios.js';
+import ConsorcioDetail from './components/consorcio/ConsorcioDetail.js';
+import AddConsorcio from './components/consorcio/AddConsorcio.js';
+import AddInquilino from './components/inquilino/AddInquilinos.js';
+import EditInquilino from './components/inquilino/EditInquilino.js';
+import InquilinoDetail from './components/inquilino/InquilinoDetail.js';
+import AddActivo from './components/activo/AddActivo.js';
+import ActivoDetail from './components/activo/ActivoDetail.js';
+import EditActivo from './components/activo/EditActivos.js';
+import EditConsorcio from './components/consorcio/EditConsorcio.js';
 import LoginMap from './components/LoginMap.jsx';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -176,7 +175,7 @@ function AppContent() {
                             <Route path="/activos/:id" element={<ProtectedRoute roles={['admin', 'employee', 'propietario']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><ActivoDetail API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
                             <Route path="/edit-activo/:id" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><EditActivo API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
 
-                            <Route path="/add-pago/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><AddPago API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+    
                             
                             <Route 
                                 path='/login-map' 

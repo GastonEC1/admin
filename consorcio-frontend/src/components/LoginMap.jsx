@@ -159,7 +159,7 @@ const LoginMap = ({ authToken }) => {
               </tr>
             </thead>
             <tbody>
-              {history.slice(0,10).map((login, index) => (
+              {history.slice(0, 10).map((login, index) => (
                 <tr key={index}>
                   <td>{login.user?.nombre}</td>{" "}
                   {/* Usa ? para evitar errores si el usuario no existe */}

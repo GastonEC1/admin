@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Card, Alert, Button, Modal, Form, Spinner, Row, Col, ListGroup } from 'react-bootstrap'; // Se añadió ListGroup
-import { FaEdit, FaTrash, FaEnvelope, FaTools, FaArrowLeft, FaCalendarAlt, FaMoneyBillWave, FaInfoCircle, FaRegDotCircle, FaClipboardList } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEnvelope, FaTools, FaArrowLeft, FaCalendarAlt,  FaInfoCircle, FaRegDotCircle, FaClipboardList } from 'react-icons/fa';
 
 function ActivoDetail() {
     const { id } = useParams();

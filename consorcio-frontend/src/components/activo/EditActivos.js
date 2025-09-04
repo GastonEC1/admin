@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Form, Button, Container, Alert, Row, Col } from 'react-bootstrap';
+import { Form, Button, Container, Alert } from 'react-bootstrap';
 import axios from 'axios';
 
 function EditActivo() {
