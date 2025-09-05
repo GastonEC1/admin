@@ -3,10 +3,16 @@ const router = express.Router();
 const Activo = require('../models/activo');
 const Consorcio = require('../models/consorcio'); 
 
-// Obtener todos los activos
+
 router.get('/', async (req, res) => {
     try {
-        const activos = await Activo.find().populate('consorcio');
+        const { consorcioId } = req.query; 
+        let query = {}; 
+        if (consorcioId) {
+            query.consorcio = consorcioId;
+        }
+
+        const activos = await Activo.find(query).populate('consorcio');
         res.json(activos);
     } catch (err) {
         console.error(err.message);
@@ -14,7 +20,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Obtener un activo por ID
 router.get('/:id', async (req, res) => {
     try {
         const activo = await Activo.findById(req.params.id).populate('consorcio');
@@ -31,9 +36,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Crear un nuevo activo
 router.post('/', async (req, res) => {
-    // Añadir los nuevos campos aquí
     const { nombre, marca, modelo, ubicacion, descripcion, fechaInstalacion, proximoMantenimiento, frecuenciaMantenimiento, estado, consorcio } = req.body;
     try {
         const nuevoActivo = await Activo.create({
@@ -41,11 +44,11 @@ router.post('/', async (req, res) => {
             marca,
             modelo,
             ubicacion,
-            descripcion, // Nuevo
-            fechaInstalacion, // Nuevo
-            proximoMantenimiento, // Nuevo
-            frecuenciaMantenimiento, // Nuevo
-            estado, // Nuevo
+            descripcion, 
+            fechaInstalacion, 
+            proximoMantenimiento, 
+            frecuenciaMantenimiento, 
+            estado, 
             consorcio
         });
 
@@ -64,9 +67,9 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Actualizar un activo por ID
+
 router.put('/:id', async (req, res) => {
-    // Añadir los nuevos campos aquí
+
     const { nombre, marca, modelo, ubicacion, descripcion, fechaInstalacion, proximoMantenimiento, frecuenciaMantenimiento, estado, consorcio } = req.body;
     try {
         let activo = await Activo.findById(req.params.id);
@@ -75,23 +78,22 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ msg: 'Activo no encontrado para actualizar.' });
         }
 
-        // Si el consorcio del activo ha cambiado, actualizar relaciones en los consorcios
         if (consorcio && activo.consorcio && activo.consorcio.toString() !== consorcio) {
             await Consorcio.findByIdAndUpdate(activo.consorcio, { $pull: { activos: activo._id } });
             await Consorcio.findByIdAndUpdate(consorcio, { $push: { activos: activo._id } });
         } else if (!activo.consorcio && consorcio) {
-             await Consorcio.findByIdAndUpdate(consorcio, { $push: { activos: activo._id } });
+            await Consorcio.findByIdAndUpdate(consorcio, { $push: { activos: activo._id } });
         }
 
         activo.nombre = nombre || activo.nombre;
         activo.marca = marca || activo.marca;
         activo.modelo = modelo || activo.modelo;
         activo.ubicacion = ubicacion || activo.ubicacion;
-        activo.descripcion = descripcion; // Nuevo
-        activo.fechaInstalacion = fechaInstalacion; // Nuevo
-        activo.proximoMantenimiento = proximoMantenimiento; // Nuevo
-        activo.frecuenciaMantenimiento = frecuenciaMantenimiento; // Nuevo
-        activo.estado = estado; // Nuevo
+        activo.descripcion = descripcion; 
+        activo.fechaInstalacion = fechaInstalacion; 
+        activo.proximoMantenimiento = proximoMantenimiento; 
+        activo.frecuenciaMantenimiento = frecuenciaMantenimiento;
+        activo.estado = estado; 
         activo.consorcio = consorcio || activo.consorcio; 
 
         await activo.save();
@@ -106,7 +108,6 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// Eliminar un activo por ID
 router.delete('/:id', async (req, res) => {
     try {
         let activo = await Activo.findById(req.params.id);

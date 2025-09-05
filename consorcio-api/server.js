@@ -6,7 +6,6 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 const corsOptions = {
     origin: [
        
@@ -25,7 +24,6 @@ mongoose.connect(process.env.MONGODB_URI)
   })
   .catch(err => console.error('Error al conectar con la base de datos:', err));
 
-// Importar Rutas
 const consorciosRouter = require('./routes/consorcios');
 const inquilinosRouter = require('./routes/inquilinos');
 const activosRouter = require('./routes/activos');

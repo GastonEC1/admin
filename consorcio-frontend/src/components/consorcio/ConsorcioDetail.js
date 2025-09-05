@@ -258,7 +258,6 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
       });
   };
 
-
   const handleDeleteEvento = async () => {
     const token = localStorage.getItem("authToken");
     await axios.delete(
@@ -276,13 +275,19 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
   };
 
   const getMaintenanceStatus = (proximoMantenimientoDate, estado) => {
+    if (estado === "En Reparacion") {
+      return { color: "warning", text: "En Reparacion" };
+    }
+    if(estado === "Fuera de Servicio") {
+      return { color: "danger", text: "Fuera de Servicio" };
+    }
+    if(estado === "Pendiente de Mantenimiento") {
+      return { color: "warning", text: "Pendiente de Mantenimiento" };
+    }
     if (!proximoMantenimientoDate) {
       return { color: "secondary", text: "No programado" };
     }
 
-    if (estado === "en Reparacion") {
-      return { color: "yellow", text: "en Reparacion" };
-    }
 
     const today = new Date();
     const maintenanceDate = new Date(proximoMantenimientoDate);
@@ -381,29 +386,7 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                   </Link>
                 )}
               </div>
-
-              <Row className="text-center mb-4 g-2">
-                <Col xs={6} md={4}>
-                  <div className="bg-light p-3 rounded-3 shadow-sm d-flex flex-column align-items-center justify-content-center h-100">
-                    <h5 className="mb-0 text-primary fw-bold">
-                      {consorcio.pisos}
-                    </h5>
-                    <small className="text-muted">Pisos</small>
-                  </div>
-                </Col>
-                <Col xs={6} md={4}>
-                  <div className="bg-light p-3 rounded-3 shadow-sm d-flex flex-column align-items-center justify-content-center h-100">
-                    <h5 className="mb-0 text-primary fw-bold">
-                      {consorcio.unidades}
-                    </h5>
-                    <small className="text-muted">Unidades</small>
-                  </div>
-                </Col>
-                <Col md={4} className="d-none d-md-block"></Col>
-              </Row>
-
               <hr className="my-4" />
-
               <h5 className="mb-3 d-flex align-items-center text-dark">
                 <FaUserTie className="me-2 text-primary" /> Información del
                 Portero:
@@ -649,16 +632,22 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
             >
               Activos
               {(userRole === "admin" || userRole === "employee") && (
-                <Button
-                  as={Link}
-                  to={`/add-activo/${consorcio._id}`}
-                  variant="light"
-                  size="sm"
-                  title="Añadir Activo"
-                  className="rounded-pill"
-                >
-                  <FaTools className="me-1" /> Añadir
-                </Button>
+                <div className="d-flex">
+                  <Link to={`/activos/${activos._id}`} className="btn btn-primary rounded-pill d-flex align-items-center justify-content-center">
+                  <FaTools className="me-2" />
+                    Ver lista de activos
+                  </Link>  
+                  <Button
+                    as={Link}
+                    to={`/add-activo/${consorcio._id}`}
+                    variant="light"
+                    size="sm"
+                    title="Añadir Activo"
+                    className="rounded-pill"
+                  >
+                    <FaTools className="me-1" /> Añadir
+                  </Button>
+                </div>
               )}
             </Card.Header>
             <ListGroup variant="flush">
@@ -681,12 +670,12 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                       </Link>
                       <Badge
                         bg={
-                          getMaintenanceStatus(activo.proximoMantenimiento)
+                          getMaintenanceStatus(activo.proximoMantenimiento, activo.estado)
                             .color
                         }
                         className="ms-2"
                       >
-                        {getMaintenanceStatus(activo.proximoMantenimiento).text}
+                        {getMaintenanceStatus(activo.proximoMantenimiento, activo.estado).text}
                       </Badge>
                     </div>
                   </ListGroup.Item>
@@ -694,8 +683,6 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
               )}
             </ListGroup>
           </Card>
-
-          {/* Tarjeta para Alertas de Mantenimiento */}
           <Card className="shadow-sm border-0 h-auto rounded-4">
             <Card.Header
               as="h4"

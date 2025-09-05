@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Card, Alert, Button, Modal, Form, Spinner, Row, Col, ListGroup } from 'react-bootstrap'; // Se añadió ListGroup
+import { Container, Card, Alert, Button, Modal, Form, Spinner, Row, Col, ListGroup } from 'react-bootstrap'; 
 import { FaEdit, FaTrash, FaEnvelope, FaTools, FaArrowLeft, FaCalendarAlt,  FaInfoCircle, FaRegDotCircle, FaClipboardList } from 'react-icons/fa';
 
 function ActivoDetail() {
@@ -96,20 +96,15 @@ function ActivoDetail() {
             return;
         }
 
-        const fechaUltimoMantenimiento = activo.fechaUltimoMantenimiento ? formatFecha(activo.fechaUltimoMantenimiento) : 'N/A';
-        const costoFormateado = activo.ultimoCostoMantenimiento ? formatCurrency(activo.ultimoCostoMantenimiento) : 'N/A';
+
 
         const subject = `Notificación de Mantenimiento - ${activo.consorcio.nombre} - ${activo.nombre}`;
         const body = `
 Estimado/a Inquilino/a,
 
-Le informamos que se ha realizado el mantenimiento del activo "${activo.nombre}" (Ubicación: ${activo.ubicacion}) en el consorcio "${activo.consorcio.nombre}".
-${activo.descripcion ? `Descripción del activo: ${activo.descripcion}` : ''}
+Le informamos que se ha realizado el mantenimiento del activo "${activo.nombre}" (Ubicación: ${activo.ubicacion}) en el consorcio "
 
-Fecha de Último Mantenimiento: ${fechaUltimoMantenimiento}
-Costo Asociado: ${costoFormateado}
-
-Este costo se incluirá en sus próximas expensas. Para más detalles, por favor, revise el historial de gastos.
+Este costo se incluirá en sus próximas expensas.
 
 Atentamente,
 La Administración del Consorcio "${activo.consorcio.nombre}"
@@ -157,10 +152,6 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
         return new Date(dateString).toLocaleDateString('es-ES', options);
     };
 
-    const formatCurrency = (amount) => {
-        if (amount === undefined || amount === null) return 'N/A';
-        return parseFloat(amount).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-    };
 
     if (loading) {
         return (
@@ -189,15 +180,14 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
         );
     }
 
-    // Prepara la descripción como una lista
     const descriptionItems = activo.descripcion 
-        ? activo.descripcion.split('\n').filter(item => item.trim() !== '') // Divide por salto de línea y filtra ítems vacíos
+        ? activo.descripcion.split('\n').filter(item => item.trim() !== '') 
         : [];
 
     return (
         <Container className="my-5">
             {activo.consorcio && activo.consorcio._id ? (
-                <Link to={`/consorcios/${activo.consorcio._id}`} className="btn btn-secondary mb-4">
+                <Link to={`/consorcios/${activo.consorcio._id}`} className="btn btn-outline-secondary mb-4">
                     <FaArrowLeft className="me-2" /> Volver al Consorcio
                 </Link>
             ) : (
