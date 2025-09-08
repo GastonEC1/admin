@@ -32,6 +32,14 @@ function ActivoDetail() {
         setDeleteSuccess('');
         setDeleteError('');
         setEmailStatus(null);
+
+        if(!id){
+            setError('ID de activo no proporcionado.');
+            setLoading(false);
+            return;
+        }
+
+
         try {
             const response = await axios.get(`${activosBackendUrl}/${id}`, {
                 headers: { 'x-auth-token': token }

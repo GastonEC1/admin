@@ -1,14 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const Activo = require('../models/activo');
-const Consorcio = require('../models/consorcio'); 
+const Consorcio = require('../models/consorcio');
+const mongoose = require('mongoose'); // ¡Asegúrate de importar Mongoose!
 
 
+// Obtener todos los activos, opcionalmente filtrados por consorcio
 router.get('/', async (req, res) => {
     try {
         const { consorcioId } = req.query; 
         let query = {}; 
         if (consorcioId) {
+            // Validación proactiva para el consorcioId del query
+            if (!mongoose.Types.ObjectId.isValid(consorcioId)) {
+                return res.status(400).json({ msg: 'ID de consorcio inválido' });
+            }
             query.consorcio = consorcioId;
         }
 
@@ -20,8 +26,14 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Obtener un activo por su ID
 router.get('/:id', async (req, res) => {
     try {
+        // **Nueva validación proactiva**
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ msg: 'ID de activo no válido.' });
+        }
+
         const activo = await Activo.findById(req.params.id).populate('consorcio');
         if (!activo) {
             return res.status(404).json({ msg: 'Activo no encontrado' });
@@ -29,16 +41,20 @@ router.get('/:id', async (req, res) => {
         res.json(activo);
     } catch (err) {
         console.error(err.message);
-        if (err.kind === 'ObjectId') {
-            return res.status(400).json({ msg: 'ID de activo no válido.' });
-        }
+        // Si el error no es por 'ObjectId', es un error de servidor
         res.status(500).send('Error del servidor al obtener el activo.');
     }
 });
 
+// Crear un nuevo activo
 router.post('/', async (req, res) => {
     const { nombre, marca, modelo, ubicacion, descripcion, fechaInstalacion, proximoMantenimiento, frecuenciaMantenimiento, estado, consorcio } = req.body;
     try {
+        // Validar el ID del consorcio si se proporciona
+        if (consorcio && !mongoose.Types.ObjectId.isValid(consorcio)) {
+             return res.status(400).json({ msg: 'ID de consorcio no válido.' });
+        }
+
         const nuevoActivo = await Activo.create({
             nombre,
             marca,
@@ -68,10 +84,19 @@ router.post('/', async (req, res) => {
 });
 
 
+// Actualizar un activo por su ID
 router.put('/:id', async (req, res) => {
-
     const { nombre, marca, modelo, ubicacion, descripcion, fechaInstalacion, proximoMantenimiento, frecuenciaMantenimiento, estado, consorcio } = req.body;
     try {
+        // **Nueva validación proactiva para el ID del activo**
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ msg: 'ID de activo no válido para actualización.' });
+        }
+        // Validar el ID del consorcio si se proporciona
+        if (consorcio && !mongoose.Types.ObjectId.isValid(consorcio)) {
+             return res.status(400).json({ msg: 'ID de consorcio no válido para actualización.' });
+        }
+
         let activo = await Activo.findById(req.params.id);
 
         if (!activo) {
@@ -101,15 +126,18 @@ router.put('/:id', async (req, res) => {
 
     } catch (err) {
         console.error(err.message);
-        if (err.kind === 'ObjectId') {
-            return res.status(400).json({ msg: 'ID de activo o consorcio no válido para actualización.' });
-        }
         res.status(500).send('Error del servidor al actualizar activo.');
     }
 });
 
+// Eliminar un activo por su ID
 router.delete('/:id', async (req, res) => {
     try {
+        // **Nueva validación proactiva**
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ msg: 'ID de activo no válido para eliminación.' });
+        }
+
         let activo = await Activo.findById(req.params.id);
 
         if (!activo) {
@@ -131,9 +159,6 @@ router.delete('/:id', async (req, res) => {
         res.json({ msg: 'Activo eliminado con éxito.' });
     } catch (err) {
         console.error(err.message);
-        if (err.kind === 'ObjectId') {
-            return res.status(400).json({ msg: 'ID de activo no válido para eliminación.' });
-        }
         res.status(500).send('Error del servidor al eliminar activo.');
     }
 });

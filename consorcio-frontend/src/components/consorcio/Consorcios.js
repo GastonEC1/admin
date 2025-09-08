@@ -2,7 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Table, Alert, Button, Card, Spinner, Form, Modal, Pagination } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaEdit,FaRegBuilding, FaSearch } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaRegBuilding, FaSearch } from 'react-icons/fa';
+
+// Función auxiliar para normalizar el texto (quitar acentos y convertir a minúsculas)
+const normalizeString = (str) => {
+    if (!str) return '';
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+};
 
 // Componente Consorcios
 function Consorcios() {
@@ -44,12 +50,21 @@ function Consorcios() {
 
     // Efecto para filtrar los consorcios y reiniciar la paginación
     useEffect(() => {
-        const lowercasedFilter = searchTerm.toLowerCase();
-        const filtered = consorcios.filter(cons =>
-            (cons.nombre && cons.nombre.toLowerCase().includes(lowercasedFilter)) ||
-            (cons.direccion && cons.direccion.toLowerCase().includes(lowercasedFilter))
-        );
-        setFilteredConsorcios(filtered);
+        const normalizedSearchTerm = normalizeString(searchTerm).trim();
+
+        if (normalizedSearchTerm.length === 0) {
+            setFilteredConsorcios(consorcios);
+        } else {
+            const filtered = consorcios.filter(cons => {
+                const normalizedNombre = normalizeString(cons.nombre);
+                const normalizedDireccion = normalizeString(cons.direccion);
+                
+                // Comprobación de la primera letra
+                return normalizedNombre.startsWith(normalizedSearchTerm) || normalizedDireccion.startsWith(normalizedSearchTerm);
+            });
+            setFilteredConsorcios(filtered);
+        }
+
         // Reinicia la página a 1 cada vez que se aplica un nuevo filtro
         setCurrentPage(1);
     }, [consorcios, searchTerm]);
@@ -127,7 +142,7 @@ function Consorcios() {
                         </div>
                         <Link to="/add-consorcio">
                             <Button variant="outline-primary" className="fw-bold rounded-pill w-100">
-                               <FaRegBuilding /> Agregar Consorcio
+                                <FaRegBuilding /> Agregar Consorcio
                             </Button>
                         </Link>
                     </div>
@@ -154,7 +169,7 @@ function Consorcios() {
                                         <td className="align-middle">{consorcio.direccion}</td>
                                         <td className="align-middle text-center">
                                             <Link to={`/edit-consorcio/${consorcio._id}`} className="btn btn-outline-primary btn-sm me-2 rounded-pill">
-                                                 <FaEdit className="me-2" /> Editar
+                                                <FaEdit className="me-2" /> Editar
                                             </Link>
                                             <Button
                                                 variant="outline-danger"
@@ -162,7 +177,7 @@ function Consorcios() {
                                                 className="rounded-pill"
                                                 onClick={() => handleShowConfirm(consorcio)}
                                             >
-                                               <FaTrash className="me-2" />  Eliminar
+                                                <FaTrash className="me-2" /> Eliminar
                                             </Button>
                                         </td>
                                     </tr>

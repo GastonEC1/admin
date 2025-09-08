@@ -1,212 +1,143 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import {
-  Container,
-  Button,
-  Spinner,
-  Alert,
-  Table,
-  Badge,
-  Card,
-} from "react-bootstrap";
-import { FaArrowLeft, FaTools, FaInfoCircle } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { FaArrowLeft, FaPlus, FaSearch } from 'react-icons/fa';
 
-function ActivosList({ API_BASE_URL, userRole }) {
-  const { consorcioId } = useParams();
+const ActivoList = () => {
+  // El URL de la API se define directamente en el componente
+  const API_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api';
+  
   const [activos, setActivos] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const [cargando, setCargando] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
+
+  const [searchParams] = useSearchParams();
+  const consorcioId = searchParams.get('consorcioId');
 
   useEffect(() => {
-    const fetchActivos = async () => {
-      setLoading(true);
-      setError(null);
-
-      if (!token) {
-        setError("No estás autenticado. Por favor, inicia sesión.");
-        setLoading(false);
-        navigate("/login");
-        return;
-      }
-      if (!consorcioId) {
-        setError("ID de consorcio no proporcionado en la URL.");
-        setLoading(false);
-        return;
-      }
+    if (!consorcioId) {
+      setCargando(false);
+      return;
+    }
+    
+    const obtenerActivos = async () => {
+      const activosBackendUrl = `${API_BASE_URL}/activos?consorcioId=${consorcioId}`;
 
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/activos?consorcioId=${consorcioId}`,
-          {
-            headers: { "x-auth-token": token },
-          }
-        );
-        setActivos(response.data);
+        const res = await fetch(activosBackendUrl);
+        if (!res.ok) throw new Error('Error al obtener los activos');
+        const data = await res.json();
+        setActivos(data);
+        setError(null);
       } catch (err) {
-        if (err.response?.status === 401) {
-          setError("Tu sesión ha expirado. Por favor, inicia sesión.");
-          navigate("/login");
-        } else {
-          setError(
-            err.response?.data?.msg || "Error al cargar los activos."
-          );
-        }
+        console.error('Error en la petición GET:', err);
+        setError('No se pudo cargar la lista. Revisa la conexión con el servidor.');
       } finally {
-        setLoading(false);
+        setCargando(false);
       }
     };
-    fetchActivos();
-  }, [API_BASE_URL, consorcioId, navigate, token]);
+    obtenerActivos();
+  }, [consorcioId]);
 
-  const getMaintenanceStatus = (proximoMantenimientoDate, estado) => {
-    if (estado === "En Reparacion" || estado === "Fuera de Servicio") {
-        return { color: estado === "En Reparacion" ? "warning" : "danger", text: estado };
-    }
-    if (estado === "Pendiente de Mantenimiento") {
-        return { color: "warning", text: "Pendiente" };
-    }
-    if (!proximoMantenimientoDate) {
-        return { color: "secondary", text: "No programado" };
-    }
-
-    const today = new Date();
-    const maintenanceDate = new Date(proximoMantenimientoDate);
-    maintenanceDate.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-
-    const diffTime = maintenanceDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-        return { color: "danger", text: `Vencido` };
-    } else if (diffDays <= 15) {
-        return { color: "danger", text: `Vence en ${diffDays} días` };
-    } else if (diffDays <= 30) {
-        return { color: "warning", text: `Vence en ${diffDays} días` };
-    } else {
-        return { color: "success", text: "OK" };
+  const eliminarActivo = async (id) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este activo?')) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/activos/${id}`, {
+          method: 'DELETE',
+        });
+        if (!res.ok) throw new Error('Error al eliminar el activo');
+        setActivos(activos.filter(activo => activo._id !== id));
+        setError(null);
+      } catch (err) {
+        console.error('Error en la petición DELETE:', err);
+        setError('No se pudo eliminar el activo.');
+      }
     }
   };
 
+  const filteredActivos = activos.filter(activo => {
+    if (!searchTerm) {
+      return true;
+    }
 
-  if (loading) {
-    return (
-      <Container className="text-center my-5">
-        <Spinner animation="border" role="status" className="text-primary" />
-        <p className="mt-2 text-muted">Cargando activos...</p>
-      </Container>
-    );
-  }
+    const searchWords = searchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
+    const activoNombre = activo.nombre.toLowerCase();
+    
+    return searchWords.every(searchWord => {
+      return activoNombre.split(' ').some(activoWord => activoWord.startsWith(searchWord));
+    });
+  });
 
-  if (error) {
-    return (
-      <Container className="my-5">
-        <Alert variant="danger">
-          {error}{" "}
-          <Button variant="link" onClick={() => navigate(-1)}>
-            Volver
-          </Button>
-        </Alert>
-      </Container>
-    );
-  }
+  if (cargando) return <div className="text-center mt-5">Cargando lista...</div>;
+  if (error) return <div className="alert alert-danger text-center mt-5">{error}</div>;
 
   return (
-    <Container className="my-5">
-      <Button
-        variant="outline-secondary"
-        onClick={() => navigate(-1)}
-        className="mb-4 rounded-pill"
-      >
-        <FaArrowLeft className="me-2" /> Volver
-      </Button>
+    <div className="container mt-5">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1>{consorcioId ? 'Activos del Consorcio' : 'Selecciona un Consorcio'}</h1>
+        
+        {consorcioId ? (
+          <div className="d-flex">
+            <Link 
+              to={`/add-activo/${consorcioId}`} 
+              className="btn btn-primary me-2"
+            >
+              <FaPlus className="me-2" /> Agregar Activo
+            </Link>
+            <Link to={`/consorcios/${consorcioId}`} className="btn btn-secondary">
+              <FaArrowLeft className="me-2" /> Volver al Consorcio
+            </Link>
+          </div>
+        ) : (
+          <Link to="/" className="btn btn-secondary">
+            <FaArrowLeft className="me-2" /> Volver a Consorcios
+          </Link>
+        )}
+      </div>
+      
+      <div className="input-group mb-3">
+        <span className="input-group-text"><FaSearch /></span>
+        <input 
+          type="text"
+          className="form-control"
+          placeholder="Buscar activo..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          disabled={!consorcioId} 
+        />
+      </div>
 
-      <Card className="shadow-lg border-0 rounded-4">
-        <Card.Header
-          as="h2"
-          className="bg-primary text-white p-3 d-flex justify-content-between align-items-center rounded-top-4"
-        >
-          <FaTools className="me-2" />
-          Listado de Activos
-          <Button
-            as={Link}
-            to={`/add-activo/${consorcioId}`}
-            variant="light"
-            size="sm"
-            title="Añadir Activo"
-            className="rounded-pill"
-          >
-            Añadir Activo
-          </Button>
-        </Card.Header>
-        <Card.Body className="p-4">
-          {activos.length === 0 ? (
-            <Alert variant="info" className="text-center">
-              No hay activos registrados para este consorcio.
-            </Alert>
+      {consorcioId ? (
+        <ul className="list-group">
+          {filteredActivos.length > 0 ? (
+            filteredActivos.map(activo => (
+              <li key={activo._id} className="list-group-item d-flex justify-content-between align-items-center">
+                <Link to={`/activos/${activo._id}`} className="text-decoration-none text-dark d-flex justify-content-between align-items-center w-100">
+                  <strong>{activo.nombre}</strong>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={(e) => {
+                      e.preventDefault(); // Evita la navegación del Link
+                      eliminarActivo(activo._id);
+                    }}
+                  >
+                    Eliminar
+                  </button>
+                </Link>
+              </li>
+            ))
           ) : (
-            <div className="table-responsive">
-              <Table striped bordered hover className="mt-3 text-center align-middle">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Tipo</th>
-                    <th>Estado</th>
-                    <th>Próximo Mantenimiento</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activos.map((activo) => (
-                    <tr key={activo._id}>
-                      <td>{activo.nombre}</td>
-                      <td>{activo.tipo}</td>
-                      <td>
-                        <Badge
-                          bg={
-                            getMaintenanceStatus(
-                              activo.proximoMantenimiento,
-                              activo.estado
-                            ).color
-                          }
-                        >
-                          {
-                            getMaintenanceStatus(
-                              activo.proximoMantenimiento,
-                              activo.estado
-                            ).text
-                          }
-                        </Badge>
-                      </td>
-                      <td>
-                        {activo.proximoMantenimiento
-                          ? new Date(
-                              activo.proximoMantenimiento
-                            ).toLocaleDateString()
-                          : "N/A"}
-                      </td>
-                      <td>
-                        <Link
-                          to={`/activos/${activo._id}`}
-                          className="btn btn-outline-primary btn-sm rounded-pill"
-                          title="Ver detalles"
-                        >
-                          <FaInfoCircle /> Ver
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
+            <li className="list-group-item text-center text-muted">No se encontraron activos.</li>
           )}
-        </Card.Body>
-      </Card>
-    </Container>
+        </ul>
+      ) : (
+        <div className="alert alert-info text-center mt-5">
+          Por favor, selecciona un consorcio de la página anterior para ver sus activos.
+        </div>
+      )}
+    </div>
   );
-}
+};
 
-export default ActivosList;
+export default ActivoList;

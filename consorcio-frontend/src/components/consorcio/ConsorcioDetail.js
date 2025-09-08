@@ -626,63 +626,65 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
         <Col md={4}>
           {/* Tarjeta de Activos */}
           <Card className="shadow-sm border-0 mb-4 h-auto rounded-4">
-            <Card.Header
-              as="h4"
-              className="bg-dark text-white p-3 d-flex justify-content-between align-items-center rounded-top-4"
-            >
-              Activos
-              {(userRole === "admin" || userRole === "employee") && (
-                <div className="d-flex">
-                  <Link to={`/activos/${activos._id}`} className="btn btn-primary rounded-pill d-flex align-items-center justify-content-center">
-                  <FaTools className="me-2" />
+    <Card.Header
+        as="h4"
+        className="bg-dark text-white p-3 d-flex justify-content-between align-items-center rounded-top-4"
+    >
+        Activos
+        {(userRole === "admin" || userRole === "employee") && (
+            <div className="d-flex align-items-center flex-wrap">
+                <Link
+                    to={`/activo-list?consorcioId=${consorcio._id}`}
+                    className="btn btn-primary rounded-pill d-flex align-items-center justify-content-center me-2 mb-2 mb-md-0"
+                >
                     Ver lista de activos
-                  </Link>  
-                  <Button
+                </Link>
+                <Button
                     as={Link}
                     to={`/add-activo/${consorcio._id}`}
                     variant="light"
                     size="sm"
                     title="Añadir Activo"
-                    className="rounded-pill"
-                  >
+                    className="rounded-pill d-flex align-items-center mb-2 mb-md-0"
+                >
                     <FaTools className="me-1" /> Añadir
-                  </Button>
-                </div>
-              )}
-            </Card.Header>
-            <ListGroup variant="flush">
-              {activos.length === 0 ? (
-                <ListGroup.Item className="text-muted text-center py-3">
-                  No hay activos registrados para este consorcio.
-                </ListGroup.Item>
-              ) : (
-                activos.map((activo) => (
-                  <ListGroup.Item
+                </Button>
+            </div>
+        )}
+    </Card.Header>
+    <ListGroup variant="flush">
+        {activos.length === 0 ? (
+            <ListGroup.Item className="text-muted text-center py-3">
+                No hay activos registrados para este consorcio.
+            </ListGroup.Item>
+        ) : (
+            activos.map((activo) => (
+                <ListGroup.Item
                     key={activo._id}
                     className="d-flex justify-content-between align-items-center py-2 px-3 border-bottom-0 border-start-0 border-end-0"
-                  >
+                >
                     <div className="d-flex align-items-center flex-wrap">
-                      <Link
-                        to={`/activos/${activo._id}`}
-                        className="text-decoration-none text-dark fw-bold me-2"
-                      >
-                        {activo.nombre} ({activo.tipo})
-                      </Link>
-                      <Badge
-                        bg={
-                          getMaintenanceStatus(activo.proximoMantenimiento, activo.estado)
-                            .color
-                        }
-                        className="ms-2"
-                      >
-                        {getMaintenanceStatus(activo.proximoMantenimiento, activo.estado).text}
-                      </Badge>
+                        <Link
+                            to={`/activos/${activo._id}`}
+                            className="text-decoration-none text-dark fw-bold me-2"
+                        >
+                            {activo.nombre} ({activo.tipo})
+                        </Link>
+                        <Badge
+                            bg={
+                                getMaintenanceStatus(activo.proximoMantenimiento, activo.estado)
+                                    .color
+                            }
+                            className="ms-2"
+                        >
+                            {getMaintenanceStatus(activo.proximoMantenimiento, activo.estado).text}
+                        </Badge>
                     </div>
-                  </ListGroup.Item>
-                ))
-              )}
-            </ListGroup>
-          </Card>
+                </ListGroup.Item>
+            ))
+        )}
+    </ListGroup>
+</Card>
           <Card className="shadow-sm border-0 h-auto rounded-4">
             <Card.Header
               as="h4"
