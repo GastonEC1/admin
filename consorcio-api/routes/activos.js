@@ -1,12 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const Activo = require('../models/activo');
-const Consorcio = require('../models/consorcio'); 
+const Consorcio = require('../models/consorcio');
+const mongoose = require('mongoose'); // ¡Asegúrate de importar Mongoose!
 
-// Obtener todos los activos
+
+// Obtener todos los activos, opcionalmente filtrados por consorcio
 router.get('/', async (req, res) => {
     try {
-        const activos = await Activo.find().populate('consorcio');
+        const { consorcioId } = req.query; 
+        let query = {}; 
+        if (consorcioId) {
+            // Validación proactiva para el consorcioId del query
+            if (!mongoose.Types.ObjectId.isValid(consorcioId)) {
+                return res.status(400).json({ msg: 'ID de consorcio inválido' });
+            }
+            query.consorcio = consorcioId;
+        }
+
+        const activos = await Activo.find(query).populate('consorcio');
         res.json(activos);
     } catch (err) {
         console.error(err.message);
@@ -14,9 +26,14 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Obtener un activo por ID
+// Obtener un activo por su ID
 router.get('/:id', async (req, res) => {
     try {
+        // **Nueva validación proactiva**
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ msg: 'ID de activo no válido.' });
+        }
+
         const activo = await Activo.findById(req.params.id).populate('consorcio');
         if (!activo) {
             return res.status(404).json({ msg: 'Activo no encontrado' });
@@ -24,28 +41,30 @@ router.get('/:id', async (req, res) => {
         res.json(activo);
     } catch (err) {
         console.error(err.message);
-        if (err.kind === 'ObjectId') {
-            return res.status(400).json({ msg: 'ID de activo no válido.' });
-        }
+        // Si el error no es por 'ObjectId', es un error de servidor
         res.status(500).send('Error del servidor al obtener el activo.');
     }
 });
 
 // Crear un nuevo activo
 router.post('/', async (req, res) => {
-    // Añadir los nuevos campos aquí
     const { nombre, marca, modelo, ubicacion, descripcion, fechaInstalacion, proximoMantenimiento, frecuenciaMantenimiento, estado, consorcio } = req.body;
     try {
+        // Validar el ID del consorcio si se proporciona
+        if (consorcio && !mongoose.Types.ObjectId.isValid(consorcio)) {
+             return res.status(400).json({ msg: 'ID de consorcio no válido.' });
+        }
+
         const nuevoActivo = await Activo.create({
             nombre,
             marca,
             modelo,
             ubicacion,
-            descripcion, // Nuevo
-            fechaInstalacion, // Nuevo
-            proximoMantenimiento, // Nuevo
-            frecuenciaMantenimiento, // Nuevo
-            estado, // Nuevo
+            descripcion, 
+            fechaInstalacion, 
+            proximoMantenimiento, 
+            frecuenciaMantenimiento, 
+            estado, 
             consorcio
         });
 
@@ -64,34 +83,42 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Actualizar un activo por ID
+
+// Actualizar un activo por su ID
 router.put('/:id', async (req, res) => {
-    // Añadir los nuevos campos aquí
     const { nombre, marca, modelo, ubicacion, descripcion, fechaInstalacion, proximoMantenimiento, frecuenciaMantenimiento, estado, consorcio } = req.body;
     try {
+        // **Nueva validación proactiva para el ID del activo**
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ msg: 'ID de activo no válido para actualización.' });
+        }
+        // Validar el ID del consorcio si se proporciona
+        if (consorcio && !mongoose.Types.ObjectId.isValid(consorcio)) {
+             return res.status(400).json({ msg: 'ID de consorcio no válido para actualización.' });
+        }
+
         let activo = await Activo.findById(req.params.id);
 
         if (!activo) {
             return res.status(404).json({ msg: 'Activo no encontrado para actualizar.' });
         }
 
-        // Si el consorcio del activo ha cambiado, actualizar relaciones en los consorcios
         if (consorcio && activo.consorcio && activo.consorcio.toString() !== consorcio) {
             await Consorcio.findByIdAndUpdate(activo.consorcio, { $pull: { activos: activo._id } });
             await Consorcio.findByIdAndUpdate(consorcio, { $push: { activos: activo._id } });
         } else if (!activo.consorcio && consorcio) {
-             await Consorcio.findByIdAndUpdate(consorcio, { $push: { activos: activo._id } });
+            await Consorcio.findByIdAndUpdate(consorcio, { $push: { activos: activo._id } });
         }
 
         activo.nombre = nombre || activo.nombre;
         activo.marca = marca || activo.marca;
         activo.modelo = modelo || activo.modelo;
         activo.ubicacion = ubicacion || activo.ubicacion;
-        activo.descripcion = descripcion; // Nuevo
-        activo.fechaInstalacion = fechaInstalacion; // Nuevo
-        activo.proximoMantenimiento = proximoMantenimiento; // Nuevo
-        activo.frecuenciaMantenimiento = frecuenciaMantenimiento; // Nuevo
-        activo.estado = estado; // Nuevo
+        activo.descripcion = descripcion; 
+        activo.fechaInstalacion = fechaInstalacion; 
+        activo.proximoMantenimiento = proximoMantenimiento; 
+        activo.frecuenciaMantenimiento = frecuenciaMantenimiento;
+        activo.estado = estado; 
         activo.consorcio = consorcio || activo.consorcio; 
 
         await activo.save();
@@ -99,16 +126,18 @@ router.put('/:id', async (req, res) => {
 
     } catch (err) {
         console.error(err.message);
-        if (err.kind === 'ObjectId') {
-            return res.status(400).json({ msg: 'ID de activo o consorcio no válido para actualización.' });
-        }
         res.status(500).send('Error del servidor al actualizar activo.');
     }
 });
 
-// Eliminar un activo por ID
+// Eliminar un activo por su ID
 router.delete('/:id', async (req, res) => {
     try {
+        // **Nueva validación proactiva**
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ msg: 'ID de activo no válido para eliminación.' });
+        }
+
         let activo = await Activo.findById(req.params.id);
 
         if (!activo) {
@@ -130,9 +159,6 @@ router.delete('/:id', async (req, res) => {
         res.json({ msg: 'Activo eliminado con éxito.' });
     } catch (err) {
         console.error(err.message);
-        if (err.kind === 'ObjectId') {
-            return res.status(400).json({ msg: 'ID de activo no válido para eliminación.' });
-        }
         res.status(500).send('Error del servidor al eliminar activo.');
     }
 });

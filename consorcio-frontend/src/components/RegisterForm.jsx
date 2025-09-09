@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Card, Form, Button, Alert, Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { FaUserPlus, FaArrowLeft } from 'react-icons/fa'; // Importar iconos
+import { FaUserPlus } from 'react-icons/fa'; // Importar iconos
 
 // ¡IMPORTANTE! VERIFICA ESTA URL. Debe ser la URL de tu backend en Codespaces, terminando en /api
 const API_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api'; 

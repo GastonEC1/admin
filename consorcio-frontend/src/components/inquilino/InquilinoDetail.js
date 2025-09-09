@@ -71,7 +71,7 @@ function InquilinoDetail() {
     return (
         <Container className="mt-5">
             {inquilino.consorcio && inquilino.consorcio._id ? (
-                <Link to={`/consorcios/${inquilino.consorcio._id}`} className="btn btn-secondary mb-3">
+                <Link to={`/consorcios/${inquilino.consorcio._id}`} className="btn btn-outline-secondary mb-3">
                     Volver al Consorcio
                 </Link>
             ) : (
@@ -93,10 +93,10 @@ function InquilinoDetail() {
                         <strong>Consorcio:</strong> {inquilino.consorcio ? inquilino.consorcio.nombre : 'N/A'}
                     </Card.Text>
                     <div className="mt-3">
-                        <Link to={`/edit-inquilino/${inquilino._id}`} className="btn btn-warning me-2">
+                        <Link to={`/edit-inquilino/${inquilino._id}`} className="btn btn-outline-warning me-2">
                             <FaEdit /> Editar Inquilino
                         </Link>
-                        <Button variant="danger" onClick={handleDeleteInquilino}>
+                        <Button variant="outline-danger" onClick={handleDeleteInquilino}>
                             <FaTrash /> Eliminar Inquilino
                         </Button>
                     </div>

@@ -7,34 +7,29 @@ function AppNavbar({ onLogout, userName, userRole }) {
     return (
         <Navbar bg="dark" variant="dark" expand="lg" className="mb-4 shadow-lg sticky-top">
             <Container>
-                {/* Brand with a subtle style */}
-                <Navbar.Brand as={Link} to="/" className="fw-bold fs-4">
+                <Navbar.Brand as={Link} to="/" className="fw-bold fs-4 text-white">
                     Gestión Consorcios
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                    {/* Navigation links, aligned to the left */}
+                <Navbar.Collapse id="basic-navbar-nav" >
                     <Nav className="me-auto">
-                        <Nav.Link as={Link} to="/consorcios" className="text-white-50 hover:text-white">
+                        <Nav.Link as={Link} to="/consorcios" className="text-white hover:text-white">
                             <FaBuilding className="me-1" /> Consorcios
                         </Nav.Link>
-
-                        {/* Admin-only links */}
                         {userRole === 'admin' && (
-                            <Nav.Link as={Link} to="/register" className="text-white-50 hover:text-white">
+                            <Nav.Link as={Link} to="/register" className="text-white hover:text-white">
                                 <FaUserPlus className="me-1" /> Registrar Usuario
                             </Nav.Link>
                         )}
                         {userRole === 'admin' && (
-                            <Nav.Link as={Link} to="/login-map" className="text-white-50 hover:text-white">
+                            <Nav.Link as={Link} to="/login-map" className="text-white hover:text-white">
                                 <FaMapMarkedAlt className='me-1' /> Mapa de Inicios de Sesión
                             </Nav.Link>
                         )}
                     </Nav>
 
-                 
                     <Nav>
-                        <Navbar.Text className="me-3 text-white-50">
+                        <Navbar.Text className="me-3 text-white">
                             Bienvenido, <strong className="text-white">{userName}</strong> ({userRole || 'sin rol'})
                         </Navbar.Text>
                         <Button variant="outline-light" onClick={onLogout} className="rounded-pill">

@@ -16,6 +16,7 @@ import ActivoDetail from './components/activo/ActivoDetail.js';
 import EditActivo from './components/activo/EditActivos.js';
 import EditConsorcio from './components/consorcio/EditConsorcio.js';
 import LoginMap from './components/LoginMap.jsx';
+import ActivoList from './components/activo/ActivoList.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
@@ -174,10 +175,10 @@ function AppContent() {
                             <Route path="/add-activo/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><AddActivo API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
                             <Route path="/activos/:id" element={<ProtectedRoute roles={['admin', 'employee', 'propietario']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><ActivoDetail API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
                             <Route path="/edit-activo/:id" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><EditActivo API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
-
+                            <Route path='/activo-list' element={<ProtectedRoute roles={['admin', 'employee', 'propietario']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><ActivoList API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
     
                             
-                            <Route 
+                            <Route
                                 path='/login-map' 
                                 element={
                                     <ProtectedRoute 

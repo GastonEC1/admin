@@ -35,11 +35,11 @@ function EditConsorcio() {
                 setDireccion(consorcioData.direccion);
                 setPisos(consorcioData.pisos);
                 setUnidades(consorcioData.unidades);
-                // Cargar datos del portero
+
                 setNombrePortero(consorcioData.nombrePortero || '');
                 setTelefonoPortero(consorcioData.telefonoPortero || '');
                 setEmailPortero(consorcioData.emailPortero || '');
-                // horarioPortero ya no se carga
+
                 
                 setLoading(false);
             } catch (err) {
