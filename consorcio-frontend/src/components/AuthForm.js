@@ -9,7 +9,9 @@ import {
   Col,
   Spinner,
 } from "react-bootstrap";
-import { FaSignInAlt } from "react-icons/fa";
+// Using a placeholder for the icon because 'react-icons/fa' is not a valid dependency in this environment.
+// Replace with a custom icon or SVG if needed in your final project.
+const FaSignInAlt = () => <span>&#x1F512;</span>;
 
 const BACKEND_BASE_URL =
   "https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev";
@@ -71,67 +73,73 @@ const AuthForm = ({ onAuthSuccess }) => {
   };
 
   return (
-    <Container className="mt-5">
-      <Row className="justify-content-center">
-        <Col md={6} lg={4}>
-          <Card className="shadow-lg border-0 rounded-4">
-            <Card.Header
-              as="h3"
-              className="text-center bg-primary text-white p-4 rounded-top-4"
-            >
-              <FaSignInAlt className="me-2" /> Iniciar Sesión
-            </Card.Header>
-            <Card.Body className="p-4">
-              <Form onSubmit={handleSubmit}>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#508bfc',
+      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+    }}>
+      <Container className="py-5 h-100">
+        <Row className="d-flex justify-content-center align-items-center h-100">
+          <Col xs={12} md={8} lg={6} xl={5}>
+            <Card className="shadow-lg" style={{ borderRadius: '1rem' }}>
+              <Card.Body className="p-5 text-center">
+                <h3 className="mb-5">Iniciar Sesión</h3>
+
                 {error && (
                   <Alert variant="danger" className="text-center">
                     {error}
                   </Alert>
                 )}
-                <Form.Group className="mb-3" controlId="formBasicEmail">
-                  <Form.Label>Correo Electrónico</Form.Label>
-                  <Form.Control
-                    type="email"
-                    placeholder="Ingresa tu email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    aria-label="Correo Electrónico"
-                    className="rounded-pill"
-                  />
-                </Form.Group>
 
-                <Form.Group className="mb-3" controlId="formBasicPassword">
-                  <Form.Label>Contraseña</Form.Label>
-                  <Form.Control
-                    type="password"
-                    placeholder="Contraseña"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    aria-label="Contraseña"
-                    className="rounded-pill"
-                  />
-                </Form.Group>
+                <Form onSubmit={handleSubmit}>
+                  <Form.Group className="mb-4">
+                    <Form.Control
+                      type="email"
+                      id="typeEmailX-2"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      aria-label="Correo Electrónico"
+                      size="lg"
+                    />
+                  </Form.Group>
 
-                <Button
-                  variant="primary"
-                  type="submit"
-                  className="w-100 mt-3 fw-bold rounded-pill"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <Spinner animation="border" size="sm" className="me-2" />
-                  ) : (
-                    "Iniciar Sesión"
-                  )}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+                  <Form.Group className="mb-4">
+                    <Form.Control
+                      type="password"
+                      id="typePasswordX-2"
+                      placeholder="Contraseña"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      aria-label="Contraseña"
+                      size="lg"
+                    />
+                  </Form.Group>
+
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    className="btn-lg w-100"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Spinner animation="border" size="sm" className="me-2" />
+                    ) : (
+                      "Iniciar Sesión"
+                    )}
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 };
 

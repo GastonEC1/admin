@@ -1,36 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import {
-  Container,
-  Card,
-  Row,
-  Col,
-  ListGroup,
-  Button,
-  Alert,
-  Spinner,
-  Badge,
-  Modal,
-  Form,
-  Dropdown,
-} from "react-bootstrap";
-import {
-  FaUserPlus,
-  FaArrowLeft,
-  FaEdit,
-  FaTrash,
-  FaInfoCircle,
-  FaTools,
-  FaSearch,
-  FaUserTie,
-  FaEllipsisV,
-  FaMapMarkerAlt,
-  FaPhone,
-  FaEnvelope,
-  FaCalendarAlt,
-
-} from "react-icons/fa";
+import {Container,Card,Row,Col,ListGroup,Button,Alert,Spinner,Badge,Modal,Form,Dropdown,} from "react-bootstrap";
+import {FaUserPlus,FaArrowLeft,FaEdit,FaTrash,FaInfoCircle,FaTools,FaSearch,FaUserTie,FaEllipsisV,FaMapMarkerAlt,FaPhone,FaEnvelope,FaCalendarAlt} from "react-icons/fa";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";

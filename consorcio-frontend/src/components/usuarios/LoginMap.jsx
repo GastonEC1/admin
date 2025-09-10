@@ -82,17 +82,31 @@ const LoginMap = ({ authToken }) => {
 
     // Añadir marcadores para cada punto en el historial
     history.forEach((login) => {
-      const marker = L.marker([login.lat, login.lon]).addTo(
-        mapInstanceRef.current
-      );
-      marker.bindPopup(`
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <strong>Usuario: ${login.user.nombre}</strong><br/>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <hr style="margin: 5px 0;" />
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                Ubicación: ${login.city}, ${login.country}<br/>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                IP: ${login.ipAddress}<br/>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                Fecha: ${new Date(login.timestamp).toLocaleString()}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          `);
-    });
+    // AÑADE ESTA COMPROBACIÓN
+    if (login.user && login.user.nombre) {
+        const marker = L.marker([login.lat, login.lon]).addTo(
+            mapInstanceRef.current
+        );
+        marker.bindPopup(`
+            <strong>Usuario: ${login.user.nombre}</strong><br/>
+            <hr style="margin: 5px 0;" />
+            Ubicación: ${login.city}, ${login.country}<br/>
+            IP: ${login.ipAddress}<br/>
+            Fecha: ${new Date(login.timestamp).toLocaleString()}
+        `);
+    } else {
+        // Opcional: Si los datos del usuario no están, puedes agregar un marcador genérico
+        const marker = L.marker([login.lat, login.lon]).addTo(
+            mapInstanceRef.current
+        );
+        marker.bindPopup(`
+            <strong>Usuario no encontrado</strong><br/>
+            <hr style="margin: 5px 0;" />
+            IP: ${login.ipAddress}<br/>
+            Fecha: ${new Date(login.timestamp).toLocaleString()}
+        `);
+    }
+});
 
     // Centrar el mapa en el último marcador
     if (history[0]) {
@@ -161,8 +175,7 @@ const LoginMap = ({ authToken }) => {
             <tbody>
               {history.slice(0, 10).map((login, index) => (
                 <tr key={index}>
-                  <td>{login.user?.nombre}</td>{" "}
-                  {/* Usa ? para evitar errores si el usuario no existe */}
+                  <td>{login.user?.nombre}</td>
                   <td>{new Date(login.timestamp).toLocaleString()}</td>
                   <td>{login.lat}</td>
                   <td>{login.lon}</td>

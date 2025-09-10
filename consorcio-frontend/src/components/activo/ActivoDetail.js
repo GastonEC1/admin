@@ -218,7 +218,6 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                     {deleteError && <Alert variant="danger">{deleteError}</Alert>}
                     {emailStatus && <Alert variant={emailStatus.type}>{emailStatus.message}</Alert>}
 
-                    {/* Sección de Datos Generales */}
                     <h5 className="mb-3 text-primary"><FaInfoCircle className="me-2" /> Información General</h5>
                     <Row className="mb-3">
                         <Col md={6} className="mb-2"><strong>Marca:</strong> {activo.marca || 'N/A'}</Col>
@@ -227,7 +226,6 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                         <Col md={6} className="mb-2"><strong>Estado:</strong> {activo.estado || 'N/A'}</Col>
                     </Row>
                     
-                    {/* Sección de Descripción mejorada */}
                     <h5 className="mb-3 mt-4 text-primary"><FaClipboardList className="me-2" /> Descripción Detallada</h5>
                     <Card className="mb-4 bg-light shadow-sm border-secondary-subtle">
                         <Card.Body className="text-dark">
@@ -247,7 +245,6 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
 
                     <hr className="my-4" />
 
-                    {/* Sección de Fechas y Mantenimiento */}
                     <h5 className="mb-3 text-primary"><FaCalendarAlt className="me-2" /> Historial y Programación</h5>
                     <Row className="mb-3">
                         <Col md={6} className="mb-2"><strong>Fecha de Instalación:</strong> {formatFecha(activo.fechaInstalacion)}</Col>
@@ -258,22 +255,20 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                     
                     <hr className="my-4" />
 
-                    {/* Botones de Acción */}
                     <div className="d-flex flex-wrap gap-2">
-                        <Link to={`/edit-activo/${activo._id}`} className="btn btn-warning">
+                        <Link to={`/edit-activo/${activo._id}`} className="btn btn-outline-warning">
                             <FaEdit className="me-2" /> Editar Activo
                         </Link>
-                        <Button variant="danger" onClick={handleDeleteActivoClick}>
+                        <Button variant="outline-danger" onClick={handleDeleteActivoClick}>
                             <FaTrash className="me-2" /> Eliminar Activo
                         </Button>
-                        <Button variant="info" onClick={handleOpenEmailModal}>
+                        <Button variant="outline-info" onClick={handleOpenEmailModal}>
                             <FaEnvelope className="me-2" /> Notificar Mantenimiento
                         </Button>
                     </div>
                 </Card.Body>
             </Card>
 
-            {/* Modal de Confirmación de Eliminación */}
             <Modal show={showDeleteConfirmModal} onHide={() => setShowDeleteConfirmModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirmar Eliminación</Modal.Title>
@@ -291,7 +286,6 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                 </Modal.Footer>
             </Modal>
 
-            {/* Modal para editar y enviar el correo */}
             <Modal show={showEmailModal} onHide={handleCloseEmailModal} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>Previsualizar y Editar Notificación de Mantenimiento</Modal.Title>
