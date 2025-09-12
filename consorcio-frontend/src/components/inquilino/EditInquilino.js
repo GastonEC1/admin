@@ -8,6 +8,7 @@ function EditInquilino() {
     const navigate = useNavigate();
 
     const [nombre, setNombre] = useState('');
+    const [apellido, setApellido] = useState('');
     const [email, setEmail] = useState('');
     const [telefono, setTelefono] = useState('');
     const [unidad, setUnidad] = useState('');
@@ -32,6 +33,7 @@ function EditInquilino() {
                 });
                 const inquilinoData = inquilinoResponse.data;
                 setNombre(inquilinoData.nombre);
+                setApellido(inquilinoData.apellido)
                 setEmail(inquilinoData.email);
                 setTelefono(inquilinoData.telefono);
                 setUnidad(inquilinoData.unidad);
@@ -60,7 +62,7 @@ function EditInquilino() {
         setErrorMessage('');
         
         try {
-            const updatedInquilino = { nombre, email, telefono, unidad, tipoUnidad, consorcio: consorcioId };
+            const updatedInquilino = { nombre, apellido ,email, telefono, unidad, tipoUnidad, consorcio: consorcioId };
             
             await axios.put(`${inquilinosBackendUrl}/${id}`, updatedInquilino, {
                 headers: { 'x-auth-token': token }
@@ -90,7 +92,15 @@ function EditInquilino() {
                     <Form.Label>Nombre</Form.Label>
                     <Form.Control type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
                 </Form.Group>
-
+                <Form.Group className='mb-3' controlId='formApellido'>
+                    <Form.Label>Apellido</Form.Label>
+                    <Form.Control
+                        type='text'
+                        value={apellido}
+                        onChange={(e) => setApellido(e.target.value)}
+                        required={false} 
+                    />
+                </Form.Group>
                 <Form.Group className="mb-3" controlId="formEmail">
                     <Form.Label>Email</Form.Label>
                     <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />

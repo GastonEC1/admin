@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet')
 const cors = require('cors');
 require('dotenv').config();
 
@@ -15,6 +16,8 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(helmet())
+
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {

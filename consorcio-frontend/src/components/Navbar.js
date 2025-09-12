@@ -1,17 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar, Nav, Button, Container } from 'react-bootstrap';
-
-const FaSignOutAlt = () => <span>&#x27A1;</span>;
-const FaUserPlus = () => <span>&#x1F464;</span>;
-const FaBuilding = () => <span>&#x1F3E2;</span>;
-const FaMapMarkedAlt = () => <span>&#x1F5FA;</span>;
-const FaUserCog = () => <span>&#x2699;</span>;
+import { FaSignOutAlt,FaUserPlus,FaBuilding, FaMapMarkedAlt,FaUserCog } from 'react-icons/fa';
 
 function AppNavbar({ onLogout, userName, userRole }) {
     return (
         <Navbar bg="light" variant="light" expand="lg" className="border-bottom sticky-top shadow-sm">
-            <style jsx>{`
+            <style >{`
                 .nav-link-custom {
                     position: relative;
                     transition: all 0.3s ease;

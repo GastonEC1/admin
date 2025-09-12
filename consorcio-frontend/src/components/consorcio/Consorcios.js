@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Table, Alert, Button, Card, Spinner, Form, Modal, Pagination } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { FaTrash,FaEdit,FaRegBuilding,FaSearch } from 'react-icons/fa';
 
-// Placeholder icons to avoid a dependency on `react-icons/fa`.
-const FaTrash = () => <span>&#x1F5D1;</span>;
-const FaEdit = () => <span>&#x270E;</span>;
-const FaRegBuilding = () => <span>&#x1F3E2;</span>;
-const FaSearch = () => <span>&#x1F50D;</span>;
-
-// Función auxiliar para normalizar el texto (quitar acentos y convertir a minúsculas)
 const normalizeString = (str) => {
     if (!str) return '';
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 };
 
-// Componente Consorcios
+
 function Consorcios() {
     const [consorcios, setConsorcios] = useState([]);
     const [filteredConsorcios, setFilteredConsorcios] = useState([]);
@@ -23,7 +17,7 @@ function Consorcios() {
     const [searchTerm, setSearchTerm] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const itemsPerPage = 15;
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [consorcioToDelete, setConsorcioToDelete] = useState(null);

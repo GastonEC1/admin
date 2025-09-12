@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Container, Table, Alert } from 'react-bootstrap';
+import { Container, Table, Alert, Spinner } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 function Activos() {
   const [activos, setActivos] = useState([]);
@@ -8,7 +9,6 @@ function Activos() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // URL corregida a /api/activos (en plural)
     const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api/activos';
     const token = localStorage.getItem('token');
 
@@ -34,6 +34,7 @@ function Activos() {
   if (loading) {
     return (
       <Container className="mt-5 text-center">
+        <Spinner animation="border" role="status" className="mb-3" />
         <h2>Cargando Activos...</h2>
       </Container>
     );
@@ -55,20 +56,26 @@ function Activos() {
           <thead>
             <tr>
               <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Consorcio</th>
+              <th>Ubicación</th>
               <th>Marca</th>
               <th>Modelo</th>
-              <th>Ubicación</th>
-              <th>Consorcio</th>
             </tr>
           </thead>
           <tbody>
             {activos.map(activo => (
               <tr key={activo._id}>
-                <td>{activo.nombre}</td>
-                <td>{activo.marca}</td>
-                <td>{activo.modelo}</td>
-                <td>{activo.ubicacion}</td>
+                <td>
+                  <Link to={`/activos/${activo._id}`}>
+                    {activo.nombre}
+                  </Link>
+                </td>
+                <td>{activo.tipo || 'N/A'}</td>
                 <td>{activo.consorcio ? activo.consorcio.nombre : 'N/A'}</td>
+                <td>{activo.ubicacion}</td>
+                <td>{activo.marca || 'N/A'}</td>
+                <td>{activo.modelo || 'N/A'}</td>
               </tr>
             ))}
           </tbody>

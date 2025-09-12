@@ -87,20 +87,6 @@ const EditUserForm = ({ user, onUserUpdated, onCancel, showMessage }) => {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="rol" className="form-label">Rol:</label>
-          <select
-            name="rol"
-            value={formData.rol}
-            onChange={handleChange}
-            className="form-select"
-            required
-          >
-            <option value="">Seleccione un rol</option>
-            <option value="admin">Admin</option>
-            <option value="user">Empleado</option>
-          </select>
-        </div>
-        <div className="mb-3">
           <label htmlFor="password" className="form-label">Nueva Contraseña:</label>
           <input
             type="password"

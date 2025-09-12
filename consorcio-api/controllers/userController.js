@@ -37,20 +37,38 @@ exports.createUser = async (req, res) => {
 exports.editUser = async (req, res) => {
     const { id } = req.params;
     const { nombre, email, rol } = req.body;
+
+    // 💡 Paso Clave: Filtramos explícitamente los campos permitidos para la actualización.
+    // Esto previene que se actualicen campos no deseados, como el rol.
+    const updateData = {
+        nombre,
+        email
+    };
+
+    // Opcional: Si quieres permitir que un 'super_admin' cambie roles,
+    // puedes añadir una condición aquí.
+    if (req.user && req.user.rol === 'super_admin' && rol) {
+        updateData.rol = rol;
+    }
+
     try {
-        let user = await User.findById(id);
-        if (!user) {
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            updateData, // Usamos el objeto filtrado
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
         }
-        
-        user.nombre = nombre || user.nombre;
-        user.email = email || user.email;
-        user.rol = rol || user.rol;
 
-        await user.save();
-        res.json({ msg: 'Usuario actualizado exitosamente', user });
+        res.json({ msg: 'Usuario actualizado exitosamente', user: updatedUser });
+
     } catch (err) {
-        console.error(err.message);
+        console.error('Error en userController.editUser:', err.message);
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ msg: err.message });
+        }
         res.status(500).send('Error del servidor');
     }
 };

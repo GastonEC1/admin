@@ -1,8 +1,33 @@
 const mongoose = require("mongoose");
 
+const historialMantenimientoSchema = new mongoose.Schema({
+  fecha: {
+    type: Date,
+    required: true,
+  },
+  descripcion: {
+    type: String,
+    required: true,
+  },
+});
+
 const activoSchema = new mongoose.Schema({
   nombre: {
     type: String,
+    required: true,
+  },
+  tipo: {
+    type: String,
+    enum: [
+      "Sistema Eléctrico",
+      "Ascensor",
+      "Plomería",
+      "HVAC",
+      "Seguridad",
+      "Mobiliario",
+      "Recreativo",
+      "Otro",
+    ],
     required: true,
   },
   marca: {
@@ -46,10 +71,6 @@ const activoSchema = new mongoose.Schema({
     ],
     default: "Operativo",
   },
-  ultimoCostoMantenimiento: {
-    type: Number,
-    default: 0,
-  },
   fechaUltimoMantenimiento: {
     type: Date,
   },
@@ -58,6 +79,7 @@ const activoSchema = new mongoose.Schema({
     ref: "Consorcio",
     required: true,
   },
+  historialMantenimiento: [historialMantenimientoSchema],
 });
 
 module.exports =

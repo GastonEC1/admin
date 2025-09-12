@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import {Container,Card,Row,Col,ListGroup,Button,Alert,Spinner,Badge,Modal,Form,Dropdown,} from "react-bootstrap";
+import {Container,Card,Row,Col,ListGroup,Button,Alert,Spinner,Badge,Modal,Form,Dropdown, Pagination,} from "react-bootstrap";
 import {FaUserPlus,FaArrowLeft,FaEdit,FaTrash,FaInfoCircle,FaTools,FaSearch,FaUserTie,FaEllipsisV,FaMapMarkerAlt,FaPhone,FaEnvelope,FaCalendarAlt} from "react-icons/fa";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import timeGridPlugin from "@fullcalendar/timegrid"
+import listPlugin from "@fullcalendar/list"
 
 function ConsorcioDetail({ API_BASE_URL, userRole }) {
   const { id } = useParams();
@@ -17,13 +19,45 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
   const [deleteMessage, setDeleteMessage] = useState(null);
   const navigate = useNavigate();
 
+  const [currentPageActivos, setCurrentPageActivos] = useState(1);
+  const itemsPerPageActivos = 5;
+
+  const   totalPagesActivos = Math.ceil(activos.length / itemsPerPageActivos)
+  const startIndexActivos = (currentPageActivos - 1) * itemsPerPageActivos
+  const currentActivos = activos.slice(startIndexActivos, startIndexActivos + itemsPerPageActivos)
+
+ 
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [itemTypeToDelete, setItemTypeToDelete] = useState("");
   const [deleting, setDeleting] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTipoInquilino, setSelectedTipoInquilino] = useState("");
+  const [currentPageInquilinos, setCurrentPageInquilinos] = useState(1);
+  const itemsPerPageInquilinos = 10;
   const [filteredInquilinos, setFilteredInquilinos] = useState([]);
+  // Tipos únicos para el fi
+
+
+  // Filtrado dinámico
+  useEffect(() => {
+    const filtrados = inquilinos.filter(inquilino => {
+      const nombre = inquilino.nombre ? inquilino.nombre.toLowerCase() : "";
+      const apellido = inquilino.apellido ? inquilino.apellido.toLowerCase(): ""
+      const term = searchTerm.toLowerCase();
+      const matchesSearchTerm = !searchTerm || nombre.startsWith(term)||apellido.startsWith(term)
+      const matchesSelectedTipo = !selectedTipoInquilino || selectedTipoInquilino === "Todos" || (inquilino.tipo === selectedTipoInquilino);
+      return matchesSearchTerm && matchesSelectedTipo;
+    });
+    setFilteredInquilinos(filtrados);
+  }, [inquilinos, searchTerm, selectedTipoInquilino]);
+
+  // Paginación sobre el filtrado
+  const totalPagesInquilinos = Math.ceil(filteredInquilinos.length / itemsPerPageInquilinos);
+  const startIndexInquilinos = (currentPageInquilinos - 1) * itemsPerPageInquilinos;
+  const currentInquilinos = filteredInquilinos.slice(startIndexInquilinos, startIndexInquilinos + itemsPerPageInquilinos);
+
 
   const [calendario, setCalendario] = useState([]);
   const [loadingCalendario, setLoadingCalendario] = useState(true);
@@ -94,23 +128,8 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
     fetchConsorcioDetails();
   }, [fetchConsorcioDetails]);
 
-  useEffect(() => {
-    if (searchTerm === "") {
-      setFilteredInquilinos(inquilinos);
-    } else {
-      const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const filtered = inquilinos.filter(
-        (inquilino) =>
-          inquilino.nombre.toLowerCase().includes(lowerCaseSearchTerm) ||
-          inquilino.unidad.toLowerCase().includes(lowerCaseSearchTerm) ||
-          (inquilino.email &&
-            inquilino.email.toLowerCase().includes(lowerCaseSearchTerm)) ||
-          (inquilino.telefono &&
-            inquilino.telefono.includes(lowerCaseSearchTerm))
-      );
-      setFilteredInquilinos(filtered);
-    }
-  }, [inquilinos, searchTerm]);
+  // Filtrado de inquilinos por nombre y tipo
+  const tiposInquilino = ["Todos", ...new Set(inquilinos.map(i => i.tipo || ""))];
 
   const handleDeleteClick = (item, type) => {
     setItemToDelete(item);
@@ -200,34 +219,46 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
 
   const handleSaveEvento = async () => {
     const token = localStorage.getItem("authToken");
-    const fechaLocal = new Date(eventoSeleccionado.fecha + "T00:00:00");
-    const eventoAEnviar = {
-      ...eventoSeleccionado,
-      fecha: fechaLocal.toISOString(),
-      consorcioId: id,
-    };
+  let fechaLocal = eventoSeleccionado?.fecha;
 
-    if (modalMode === "add") {
-      await axios.post(
-        `${API_BASE_URL}/api/calendars`,
-        eventoAEnviar,
-        { headers: { "x-auth-token": token } }
-      );
-    } else {
-      await axios.put(
-        `${API_BASE_URL}/api/calendars/${eventoSeleccionado._id}`,
-        eventoAEnviar,
-        { headers: { "x-auth-token": token } }
-      );
-    }
-    setShowEventoModal(false);
-    axios
-      .get(`${API_BASE_URL}/api/calendars?consorcioId=${id}`, {
-        headers: { "x-auth-token": token },
-      })
-      .then((response) => {
-        setCalendario(response.data);
-      });
+  // Normaliza la fecha para evitar errores
+  if (fechaLocal && fechaLocal.length === 10) {
+    // formato correcto YYYY-MM-DD
+    fechaLocal = new Date(fechaLocal + "T00:00:00");
+  } else if (fechaLocal) {
+    // Si viene en otro formato, intenta convertirlo
+    fechaLocal = new Date(fechaLocal);
+  } else {
+    fechaLocal = new Date(); // fallback a hoy
+  }
+
+  const eventoAEnviar = {
+    ...eventoSeleccionado,
+    fecha: fechaLocal.toISOString(),
+    consorcioId: id,
+  };
+
+  if (modalMode === "add") {
+    await axios.post(
+      `${API_BASE_URL}/api/calendars`,
+      eventoAEnviar,
+      { headers: { "x-auth-token": token } }
+    );
+  } else {
+    await axios.put(
+      `${API_BASE_URL}/api/calendars/${eventoSeleccionado._id}`,
+      eventoAEnviar,
+      { headers: { "x-auth-token": token } }
+    );
+  }
+  setShowEventoModal(false);
+  axios
+    .get(`${API_BASE_URL}/api/calendars?consorcioId=${id}`, {
+      headers: { "x-auth-token": token },
+    })
+    .then((response) => {
+      setCalendario(response.data);
+    });
   };
 
   const handleDeleteEvento = async () => {
@@ -257,6 +288,9 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
       return { color: "warning", text: "Pendiente de Mantenimiento" };
     }
     if (!proximoMantenimientoDate) {
+      if (estado === "Operativo"){
+        return {color: "success", text: "OK"}
+      }
       return { color: "secondary", text: "No programado" };
     }
 
@@ -281,6 +315,31 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
       return { color: "success", text: "OK" };
     }
   };
+
+  const handleEventDrop = async (info) =>{
+    const token = localStorage.getItem("authToken")
+    const eventoId = info.event.id
+    const nuevaFecha = info.event.startStr
+
+    try{
+      await axios.put(
+        `${API_BASE_URL}/api/calendars/${eventoId}`,
+        {fecha: nuevaFecha},
+        {headers: {"x-auth-token": token}}
+      )
+      axios
+      .get(`${API_BASE_URL}/api/calendars?consorcioId=${id}`,{
+        headers: {"x-auth-token": token}
+      })
+      .then((response) =>
+      setCalendario(response.data)
+    )}catch(err){
+      alert("Error al actualizar la fecha del evento")
+      info.revert()
+    }
+  }
+  
+
 
   if (loading) {
     return (
@@ -380,7 +439,6 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
             </Card.Body>
           </Card>
 
-          {/* Tarjeta de Inquilinos */}
           <Card className="shadow-sm border-0 mb-4 h-auto rounded-4">
             <Card.Header
               as="h4"
@@ -431,13 +489,13 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                   No se encontraron inquilinos.
                 </ListGroup.Item>
               ) : (
-                filteredInquilinos.map((inquilino) => (
+                currentInquilinos.map((inquilino) => (
                   <ListGroup.Item
                     key={inquilino._id}
                     className="d-flex justify-content-between align-items-center py-2 px-3 border-bottom-0 border-start-0 border-end-0"
                   >
                     <div>
-                      <strong>{inquilino.nombre}</strong> ({inquilino.unidad})
+                      <strong>{inquilino.nombre} {inquilino.apellido}</strong> ({inquilino.unidad})
                       {inquilino.email && (
                         <div className="text-muted small">
                           {inquilino.email}
@@ -480,6 +538,29 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                 ))
               )}
             </ListGroup>
+            {totalPagesInquilinos > 1 && (
+  <div className="d-flex justify-content-center flex-wrap my-2">
+    <Pagination>
+      <Pagination.Prev
+        onClick={() => setCurrentPageInquilinos(currentPageInquilinos - 1)}
+        disabled={currentPageInquilinos === 1}
+      />
+      {Array.from({ length: totalPagesInquilinos }, (_, i) => (
+        <Pagination.Item
+          key={i + 1}
+          active={currentPageInquilinos === i + 1}
+          onClick={() => setCurrentPageInquilinos(i + 1)}
+        >
+          {i + 1}
+        </Pagination.Item>
+      ))}
+      <Pagination.Next
+        onClick={() => setCurrentPageInquilinos(currentPageInquilinos + 1)}
+        disabled={currentPageInquilinos === totalPagesInquilinos}
+      />
+    </Pagination>
+  </div>
+)}
           </Card>
           <Card className="shadow-sm border-0 mb-4 h-auto rounded-4">
             <Card.Header
@@ -490,8 +571,13 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
             </Card.Header>
             <Card.Body>
               <FullCalendar
-                plugins={[dayGridPlugin, interactionPlugin]}
+                plugins={[dayGridPlugin, interactionPlugin,timeGridPlugin,listPlugin]}
                 initialView="dayGridMonth"
+                headerToolbar={{
+                  left: "prev,next today",
+                  center: "title",
+                  right: "dayGridMonth, timeGridWeek, timeGridDay, listWeek"
+                }}
                 events={calendario.map((evento) => ({
                     id: evento._id,
                   title: `${evento.tipo === "mantenimiento" ? "Mantenimiento" : evento.tipo === "evento" ? "Evento" : "Asamblea"}: ${evento.descripcion}`,
@@ -506,6 +592,8 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                 }))}
                 dateClick={handleDateClick}
                 eventClick={handleEventClick}
+                eventDrop={handleEventDrop}
+                editable={true}
                 height="auto"
               />
               <Modal
@@ -607,7 +695,7 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
             <div className="d-flex align-items-center flex-wrap">
                 <Link
                     to={`/activo-list?consorcioId=${consorcio._id}`}
-                    className="btn btn-primary rounded-pill d-flex align-items-center justify-content-center me-2 mb-2 mb-md-0"
+                    className="btn btn-outline-light rounded-pill d-flex align-items-center justify-content-center me-2 mb-2 mb-md-0"
                 >
                     Ver lista de activos
                 </Link>
@@ -630,7 +718,7 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                 No hay activos registrados para este consorcio.
             </ListGroup.Item>
         ) : (
-            activos.map((activo) => (
+            currentActivos.map((activo) => (
                 <ListGroup.Item
                     key={activo._id}
                     className="d-flex justify-content-between align-items-center py-2 px-3 border-bottom-0 border-start-0 border-end-0"
@@ -640,7 +728,7 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                             to={`/activos/${activo._id}`}
                             className="text-decoration-none text-dark fw-bold me-2"
                         >
-                            {activo.nombre} ({activo.tipo})
+                            {activo.nombre} 
                         </Link>
                         <Badge
                             bg={
@@ -656,6 +744,29 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
             ))
         )}
     </ListGroup>
+    {totalPagesActivos > 1 && (
+      <div className="d-flex justify-content-center flex-wrap my-2">
+        <Pagination>
+          <Pagination.Prev
+            onClick={() => setCurrentPageActivos(currentPageActivos - 1)}
+            disabled={currentPageActivos === 1}
+          />
+          {Array.from({ length: totalPagesActivos }, (_, i) => (
+            <Pagination.Item
+              key={i + 1}
+              active={currentPageActivos === i + 1}
+              onClick={() => setCurrentPageActivos(i + 1)}
+            >
+              {i + 1}
+            </Pagination.Item>
+          ))}
+          <Pagination.Next
+            onClick={() => setCurrentPageActivos(currentPageActivos + 1)}
+            disabled={currentPageActivos === totalPagesActivos}
+          />
+        </Pagination>
+      </div>
+    )}
 </Card>
           <Card className="shadow-sm border-0 h-auto rounded-4">
             <Card.Header

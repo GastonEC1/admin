@@ -7,7 +7,6 @@ const adminMiddleware = require('../middleware/admin');
 // Todas las rutas que siguen están protegidas.
 router.use(authMiddleware, adminMiddleware);
 
-// Rutas de gestión de usuarios
 router.get('/users', userController.getAllUsers); // Para ver la lista de usuarios
 router.post('/users', userController.createUser); // Para crear un usuario
 router.put('/users/:id', userController.editUser); // Para editar un usuario por su ID

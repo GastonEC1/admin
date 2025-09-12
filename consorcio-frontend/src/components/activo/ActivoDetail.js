@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Card, Alert, Button, Modal, Form, Spinner, Row, Col, ListGroup } from 'react-bootstrap'; 
-import { FaEdit, FaTrash, FaEnvelope, FaTools, FaArrowLeft, FaCalendarAlt,  FaInfoCircle, FaRegDotCircle, FaClipboardList } from 'react-icons/fa';
+import { FaArrowLeft, FaTools, FaInfoCircle, FaClipboardList, FaCalendarAlt, FaRegDotCircle, FaEdit, FaTrash, FaEnvelope, FaTag, FaMapMarkerAlt } from 'react-icons/fa'; // Added FaTag and FaMapMarkerAlt
 
 function ActivoDetail() {
     const { id } = useParams();
@@ -20,6 +20,14 @@ function ActivoDetail() {
     const [sendingEmail, setSendingEmail] = useState(false);
 
     const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+    
+    // Nuevo estado para el modal de historial de mantenimiento
+    const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+    const [newMaintenanceDate, setNewMaintenanceDate] = useState('');
+    const [newMaintenanceDescription, setNewMaintenanceDescription] = useState('');
+    const [addingMaintenance, setAddingMaintenance] = useState(false);
+    const [maintenanceError, setMaintenanceError] = useState('');
+
 
     const backendBaseUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api';
     const activosBackendUrl = `${backendBaseUrl}/activos`;
@@ -32,13 +40,13 @@ function ActivoDetail() {
         setDeleteSuccess('');
         setDeleteError('');
         setEmailStatus(null);
+        setMaintenanceError('');
 
         if(!id){
             setError('ID de activo no proporcionado.');
             setLoading(false);
             return;
         }
-
 
         try {
             const response = await axios.get(`${activosBackendUrl}/${id}`, {
@@ -104,8 +112,6 @@ function ActivoDetail() {
             return;
         }
 
-
-
         const subject = `Notificación de Mantenimiento - ${activo.consorcio.nombre} - ${activo.nombre}`;
         const body = `
 Estimado/a Inquilino/a,
@@ -154,12 +160,38 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
         }
     };
 
+    // Nueva función para manejar el envío del formulario del historial
+    const handleAddMaintenance = async () => {
+        setAddingMaintenance(true);
+        setMaintenanceError('');
+        try {
+            await axios.post(`${activosBackendUrl}/${id}/mantenimiento`, {
+                fecha: newMaintenanceDate,
+                descripcion: newMaintenanceDescription,
+            }, {
+                headers: { 'x-auth-token': token }
+            });
+
+            // Actualizar la lista de activos después de un envío exitoso
+            fetchActivo();
+            
+            setShowMaintenanceModal(false);
+            setNewMaintenanceDate('');
+            setNewMaintenanceDescription('');
+
+        } catch (err) {
+            console.error('Error al agregar entrada de mantenimiento:', err.response ? err.response.data : err.message);
+            setMaintenanceError(`Error al agregar entrada: ${err.response?.data?.msg || err.message}`);
+        } finally {
+            setAddingMaintenance(false);
+        }
+    };
+
     const formatFecha = (dateString) => {
         if (!dateString) return 'N/A';
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString('es-ES', options);
     };
-
 
     if (loading) {
         return (
@@ -204,7 +236,7 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                 </Link>
             )}
 
-            <h1 className="mb-2 text-primary">{activo.nombre} <small className="text-muted fs-4">({activo.tipo || 'N/A'})</small></h1>
+            <h1 className="mb-2 text-primary">{activo.nombre}</h1>
             {activo.consorcio && (
                 <p className="lead text-muted mb-4">Perteneciente al consorcio: <Link to={`/consorcios/${activo.consorcio._id}`} className="text-decoration-none">{activo.consorcio.nombre}</Link></p>
             )}
@@ -217,12 +249,18 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                     {deleteSuccess && <Alert variant="success">{deleteSuccess}</Alert>}
                     {deleteError && <Alert variant="danger">{deleteError}</Alert>}
                     {emailStatus && <Alert variant={emailStatus.type}>{emailStatus.message}</Alert>}
+                    {maintenanceError && <Alert variant="danger">{maintenanceError}</Alert>}
 
                     <h5 className="mb-3 text-primary"><FaInfoCircle className="me-2" /> Información General</h5>
                     <Row className="mb-3">
+                        <Col md={6} className="mb-2">
+                            <strong><FaTag className="me-2 text-secondary"/>Tipo:</strong> {activo.tipo || 'N/A'}
+                        </Col>
                         <Col md={6} className="mb-2"><strong>Marca:</strong> {activo.marca || 'N/A'}</Col>
                         <Col md={6} className="mb-2"><strong>Modelo:</strong> {activo.modelo || 'N/A'}</Col>
-                        <Col md={6} className="mb-2"><strong>Ubicación:</strong> {activo.ubicacion || 'N/A'}</Col>
+                        <Col md={6} className="mb-2">
+                            <strong><FaMapMarkerAlt className="me-2 text-secondary"/>Ubicación:</strong> {activo.ubicacion || 'N/A'}
+                        </Col>
                         <Col md={6} className="mb-2"><strong>Estado:</strong> {activo.estado || 'N/A'}</Col>
                     </Row>
                     
@@ -249,10 +287,25 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                     <Row className="mb-3">
                         <Col md={6} className="mb-2"><strong>Fecha de Instalación:</strong> {formatFecha(activo.fechaInstalacion)}</Col>
                         <Col md={6} className="mb-2"><strong>Frecuencia de Mantenimiento:</strong> {activo.frecuenciaMantenimiento || 'N/A'}</Col>
-                        <Col md={6} className="mb-2"><strong>Último Mantenimiento:</strong> {formatFecha(activo.fechaUltimoMantenimiento)}</Col>
                         <Col md={6} className="mb-2"><strong>Próximo Mantenimiento:</strong> {formatFecha(activo.proximoMantenimiento)}</Col>
                     </Row>
                     
+                    {/* Nueva: Sección para el historial de mantenimiento */}
+                    <h5 className="mb-3 mt-4 text-primary"><FaClipboardList className="me-2" /> Historial de Mantenimiento</h5>
+                    {activo.historialMantenimiento && activo.historialMantenimiento.length > 0 ? (
+                        <ListGroup>
+                            {activo.historialMantenimiento.map((mantenimiento, index) => (
+                                <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{formatFecha(mantenimiento.fecha)}:</strong> {mantenimiento.descripcion}
+                                    </div>
+                                </ListGroup.Item>
+                            ))}
+                        </ListGroup>
+                    ) : (
+                        <Alert variant="info" className="mt-3">No hay historial de mantenimiento registrado para este activo.</Alert>
+                    )}
+
                     <hr className="my-4" />
 
                     <div className="d-flex flex-wrap gap-2">
@@ -265,10 +318,15 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                         <Button variant="outline-info" onClick={handleOpenEmailModal}>
                             <FaEnvelope className="me-2" /> Notificar Mantenimiento
                         </Button>
+                        {/* Nuevo: Botón para agregar entrada al historial */}
+                        <Button variant="outline-primary" onClick={() => setShowMaintenanceModal(true)}>
+                            <FaTools className="me-2" /> Agregar Mantenimiento
+                        </Button>
                     </div>
                 </Card.Body>
             </Card>
 
+            {/* Modal de confirmación de eliminación */}
             <Modal show={showDeleteConfirmModal} onHide={() => setShowDeleteConfirmModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirmar Eliminación</Modal.Title>
@@ -327,6 +385,51 @@ La Administración del Consorcio "${activo.consorcio.nombre}"
                                 Enviando...
                             </>
                         ) : 'Enviar Correo'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showMaintenanceModal} onHide={() => setShowMaintenanceModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Agregar Mantenimiento</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {maintenanceError && <Alert variant="danger">{maintenanceError}</Alert>}
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Fecha</Form.Label>
+                            <Form.Control 
+                                type="date" 
+                                value={newMaintenanceDate} 
+                                onChange={(e) => setNewMaintenanceDate(e.target.value)} 
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Descripción</Form.Label>
+                            <Form.Control 
+                                as="textarea" 
+                                rows={3} 
+                                value={newMaintenanceDescription} 
+                                onChange={(e) => setNewMaintenanceDescription(e.target.value)} 
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowMaintenanceModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button 
+                        variant="primary" 
+                        onClick={handleAddMaintenance} 
+                        disabled={addingMaintenance || !newMaintenanceDate || !newMaintenanceDescription}
+                    >
+                        {addingMaintenance ? (
+                            <>
+                                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                                Agregando...
+                            </>
+                        ) : 'Agregar'}
                     </Button>
                 </Modal.Footer>
             </Modal>

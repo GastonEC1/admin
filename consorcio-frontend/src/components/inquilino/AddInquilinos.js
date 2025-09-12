@@ -8,6 +8,7 @@ function AddInquilino() {
     const navigate = useNavigate();
 
     const [nombre, setNombre] = useState('');
+    const [apellido, setApellido] = useState('')
     const [email, setEmail] = useState('');
     const [telefono, setTelefono] = useState('');
     const [unidad, setUnidad] = useState('');
@@ -45,7 +46,7 @@ function AddInquilino() {
         
         try {
             // El ID del consorcio ahora viene de useParams
-            const newInquilino = { nombre, email, telefono, unidad, tipoUnidad, consorcio: consorcioId };
+            const newInquilino = { nombre, apellido ,email, telefono, unidad, tipoUnidad, consorcio: consorcioId };
             
             await axios.post(`${backendUrl}/inquilinos`, newInquilino, {
                 headers: { 'x-auth-token': token }
@@ -53,6 +54,7 @@ function AddInquilino() {
             
             setSuccessMessage('Inquilino creado y asociado con éxito.');
             setNombre('');
+            setApellido('')
             setEmail('');
             setTelefono('');
             setUnidad('');
@@ -81,13 +83,22 @@ function AddInquilino() {
                     <Form.Label>Nombre</Form.Label>
                     <Form.Control 
                         type="text" 
-                        placeholder="Juan Pérez" 
+                        placeholder="Juan" 
                         value={nombre} 
                         onChange={(e) => setNombre(e.target.value)} 
                         required 
                     />
                 </Form.Group>
-
+                <Form.Group className="mb-3" controlId="formApellido">
+                    <Form.Label>Apellido</Form.Label>
+                    <Form.Control 
+                    type="text"
+                    placeholder='Perez'
+                    value={apellido}
+                    onChange={(e) => setApellido(e.target.value)}
+                    required
+                    />
+                </Form.Group>
                 <Form.Group className="mb-3" controlId="formEmail">
                     <Form.Label>Email</Form.Label>
                     <Form.Control 

@@ -43,10 +43,11 @@ router.get('/:id', async (req, res) => {
 // Crear un nuevo inquilino
 router.post('/', async (req, res) => {
     // Asegurarse de recibir el nuevo campo tipoUnidad
-    const { nombre, email, telefono, unidad, tipoUnidad, consorcio } = req.body; 
+    const { nombre, apellido ,email, telefono, unidad, tipoUnidad, consorcio } = req.body; 
     try {
         const nuevoInquilino = await Inquilino.create({
             nombre,
+            apellido,
             email,
             telefono,
             unidad,
@@ -75,7 +76,7 @@ router.post('/', async (req, res) => {
 
 // Actualizar un inquilino por ID
 router.put('/:id', async (req, res) => {
-    const { nombre, email, telefono, unidad, tipoUnidad, consorcio } = req.body; 
+    const { nombre, apellido, email, telefono, unidad, tipoUnidad, consorcio } = req.body; 
     try {
         let inquilino = await Inquilino.findById(req.params.id);
 
@@ -107,6 +108,7 @@ router.put('/:id', async (req, res) => {
 
         // Actualizar los datos del inquilino
         inquilino.nombre = nombre;
+        inquilino.apellido = apellido;
         inquilino.email = email;
         inquilino.telefono = telefono;
         inquilino.unidad = unidad;
