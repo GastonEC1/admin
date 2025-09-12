@@ -7,7 +7,7 @@ const adminMiddleware = require('../middleware/admin');
 // @route   POST /api/auth/register
 // @desc    Registrar un nuevo usuario
 // @access  Public
-router.post('/register', authMiddleware, adminMiddleware, authController.registerUser);
+router.post('/register', authController.registerUser);
 
 // @route   POST /api/auth/login
 // @desc    Autenticar usuario y obtener token

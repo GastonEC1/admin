@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container, Table, Alert, Button, Card, Spinner, Form, Modal, Pagination } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaEdit, FaRegBuilding, FaSearch } from 'react-icons/fa';
+import { FaTrash,FaEdit,FaRegBuilding,FaSearch } from 'react-icons/fa';
 
-// Función auxiliar para normalizar el texto (quitar acentos y convertir a minúsculas)
 const normalizeString = (str) => {
     if (!str) return '';
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 };
 
-// Componente Consorcios
+
 function Consorcios() {
     const [consorcios, setConsorcios] = useState([]);
     const [filteredConsorcios, setFilteredConsorcios] = useState([]);
@@ -19,7 +17,7 @@ function Consorcios() {
     const [searchTerm, setSearchTerm] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const itemsPerPage = 15;
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [consorcioToDelete, setConsorcioToDelete] = useState(null);
@@ -29,22 +27,29 @@ function Consorcios() {
 
     // Función para manejar la carga de datos
     useEffect(() => {
-        axios.get(backendUrl, {
+        setLoading(true);
+        fetch(backendUrl, {
             headers: { 'x-auth-token': token }
         })
         .then(response => {
-            if (Array.isArray(response.data)) {
-                setConsorcios(response.data);
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (Array.isArray(data)) {
+                setConsorcios(data);
             } else {
-                console.warn('La API de consorcios no devolvió un array:', response.data);
+                console.warn('La API de consorcios no devolvió un array:', data);
                 setConsorcios([]);
             }
             setLoading(false);
         })
-        .catch(error => {
+        .catch(err => {
             setError('Error al cargar los consorcios. Por favor, revisa la conexión del backend.');
             setLoading(false);
-            console.error('Error fetching consorcios:', error);
+            console.error('Error fetching consorcios:', err);
         });
     }, [backendUrl, token]);
 
@@ -59,13 +64,11 @@ function Consorcios() {
                 const normalizedNombre = normalizeString(cons.nombre);
                 const normalizedDireccion = normalizeString(cons.direccion);
                 
-                // Comprobación de la primera letra
                 return normalizedNombre.startsWith(normalizedSearchTerm) || normalizedDireccion.startsWith(normalizedSearchTerm);
             });
             setFilteredConsorcios(filtered);
         }
 
-        // Reinicia la página a 1 cada vez que se aplica un nuevo filtro
         setCurrentPage(1);
     }, [consorcios, searchTerm]);
 
@@ -89,15 +92,19 @@ function Consorcios() {
         if (!consorcioToDelete) return;
 
         try {
-            await axios.delete(`${backendUrl}/${consorcioToDelete._id}`, {
+            const response = await fetch(`${backendUrl}/${consorcioToDelete._id}`, {
+                method: 'DELETE',
                 headers: { 'x-auth-token': token }
             });
-            // Elimina el consorcio de la lista principal
+            if (!response.ok) {
+                 throw new Error('Error al eliminar el consorcio.');
+            }
+            
             setConsorcios(prevConsorcios => prevConsorcios.filter(cons => cons._id !== consorcioToDelete._id));
             handleCloseConfirm();
         } catch (err) {
             setError('Error al eliminar el consorcio. Inténtalo de nuevo.');
-            console.error('Error deleting consorcio:', err.response ? err.response.data : err.message);
+            console.error('Error deleting consorcio:', err.message);
             handleCloseConfirm();
         }
     };
@@ -105,10 +112,10 @@ function Consorcios() {
     if (loading) {
         return (
             <Container className="mt-5 text-center">
-                <Spinner animation="border" role="status">
+                <Spinner animation="border" role="status" variant="primary">
                     <span className="visually-hidden">Cargando...</span>
                 </Spinner>
-                <h2 className="mt-2">Cargando Consorcios...</h2>
+                <h2 className="mt-2 text-secondary">Cargando Consorcios...</h2>
             </Container>
         );
     }
@@ -122,20 +129,20 @@ function Consorcios() {
     }
 
     return (
-        <Container className="mt-5">
+        <Container className="my-5">
             <Card className="shadow-lg border-0 rounded-4 p-4">
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
-                    <h2 className="mb-3 mb-md-0">Lista de Consorcios ({filteredConsorcios.length})</h2>
+                    <h2 className="mb-3 mb-md-0 fw-bold text-primary">Lista de Consorcios ({filteredConsorcios.length})</h2>
                     <div className="d-flex flex-column flex-md-row w-100 w-md-auto align-items-stretch align-items-md-center">
                         {/* Campo de búsqueda */}
                         <div className="input-group me-md-3 mb-3 mb-md-0">
-                            <span className="input-group-text bg-light border-end-0">
+                            <span className="input-group-text bg-light border-end-0 rounded-start-pill">
                                 <FaSearch />
                             </span>
                             <Form.Control
                                 type="text"
                                 placeholder="Buscar por nombre o dirección..."
-                                className="rounded-start-0"
+                                className="rounded-end-pill"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -151,7 +158,7 @@ function Consorcios() {
                 {currentItems.length > 0 ? (
                     <div className="table-responsive">
                         <Table hover responsive className="shadow-sm rounded-4 overflow-hidden mb-0">
-                            <thead className="bg-light">
+                            <thead className="bg-primary text-white">
                                 <tr>
                                     <th className="py-3">Nombre</th>
                                     <th className="py-3">Dirección</th>

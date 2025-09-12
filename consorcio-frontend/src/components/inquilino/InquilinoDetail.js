@@ -81,7 +81,7 @@ function InquilinoDetail() {
             )}
             
             <Card>
-                <Card.Header as="h2">{inquilino.nombre}</Card.Header>
+                <Card.Header as="h2">{inquilino.nombre}{inquilino.apellido}</Card.Header>
                 <Card.Body>
                     {deleteSuccess && <Alert variant="success">{deleteSuccess}</Alert>}
                     {deleteError && <Alert variant="danger">{deleteError}</Alert>}

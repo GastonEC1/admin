@@ -54,6 +54,7 @@ function Inquilinos() {
           <thead>
             <tr>
               <th>Nombre</th>
+              <th>Apellido</th>
               <th>Unidad</th>
               <th>Teléfono</th>
               <th>Email</th>
@@ -64,6 +65,7 @@ function Inquilinos() {
             {inquilinos.map(inquilino => (
               <tr key={inquilino._id}>
                 <td>{inquilino.nombre}</td>
+                <td>{inquilino.apellido}</td>
                 <td>{inquilino.unidad}</td>
                 <td>{inquilino.telefono}</td>
                 <td>{inquilino.email}</td>

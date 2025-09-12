@@ -4,7 +4,7 @@ import { Container, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import AppNavbar from './components/Navbar.js';
 import AuthForm from './components/AuthForm.js';
-import RegisterForm from './components/RegisterForm.jsx';
+import RegisterForm from './components/usuarios/RegisterForm.jsx';
 import Consorcios from './components/consorcio/Consorcios.js';
 import ConsorcioDetail from './components/consorcio/ConsorcioDetail.js';
 import AddConsorcio from './components/consorcio/AddConsorcio.js';
@@ -15,11 +15,13 @@ import AddActivo from './components/activo/AddActivo.js';
 import ActivoDetail from './components/activo/ActivoDetail.js';
 import EditActivo from './components/activo/EditActivos.js';
 import EditConsorcio from './components/consorcio/EditConsorcio.js';
-import LoginMap from './components/LoginMap.jsx';
+import LoginMap from './components/usuarios/LoginMap.jsx';
 import ActivoList from './components/activo/ActivoList.js';
+import AdminDashboard from './components/usuarios/AdminDashboard.jsx';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
+import EditUserForm from './components/usuarios/EditUserForm.jsx';
 
 const API_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev';
 
@@ -148,51 +150,30 @@ function AppContent() {
                     <AppNavbar onLogout={() => handleLogout(true)} userName={userName} userRole={userRole} />
                     <Container fluid className="mt-3">
                         <Routes>
-                            <Route
-                                path="/register"
-                                element={
-                                    <ProtectedRoute 
-                                        roles={['admin']} 
-                                        isAuthenticated={isAuthenticated} 
-                                        userRole={userRole} 
-                                        authLoading={authLoading}
-                                    >
-                                        <RegisterForm API_BASE_URL={API_BASE_URL} />
-                                    </ProtectedRoute>
-                                }
-                            />
+                            <Route path="/register"element={<ProtectedRoute roles={['admin']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><RegisterForm API_BASE_URL={API_BASE_URL} /></ProtectedRoute> }/>
 
-                            <Route path="/" element={<ProtectedRoute roles={['admin', 'propietario','employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><Consorcios API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
-                            <Route path="/consorcios" element={<ProtectedRoute roles={['admin', 'propietario','employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><Consorcios API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
-                            <Route path="/consorcios/:id" element={<ProtectedRoute roles={['admin', 'propietario','employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><ConsorcioDetail API_BASE_URL={API_BASE_URL} userRole={userRole} userName={userName} /></ProtectedRoute>} />
+                            <Route path="/" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><Consorcios API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                            <Route path="/consorcios" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><Consorcios API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                            <Route path="/consorcios/:id" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><ConsorcioDetail API_BASE_URL={API_BASE_URL} userRole={userRole} userName={userName} /></ProtectedRoute>} />
                             <Route path="/add-consorcio" element={<ProtectedRoute roles={['admin','employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><AddConsorcio API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
                             <Route path="/edit-consorcio/:id" element={<ProtectedRoute roles={['admin','employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><EditConsorcio API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
 
                             <Route path="/add-inquilino/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><AddInquilino API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
-                            <Route path="/inquilinos/:id" element={<ProtectedRoute roles={['admin', 'employee', 'propietario']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><InquilinoDetail API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                            <Route path="/inquilinos/:id" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><InquilinoDetail API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
                             <Route path="/edit-inquilino/:id" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><EditInquilino API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
 
                             <Route path="/add-activo/:consorcioId" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><AddActivo API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
-                            <Route path="/activos/:id" element={<ProtectedRoute roles={['admin', 'employee', 'propietario']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><ActivoDetail API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                            <Route path="/activos/:id" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><ActivoDetail API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
                             <Route path="/edit-activo/:id" element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><EditActivo API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
-                            <Route path='/activo-list' element={<ProtectedRoute roles={['admin', 'employee', 'propietario']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><ActivoList API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                            <Route path='/activo-list' element={<ProtectedRoute roles={['admin', 'employee']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><ActivoList API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
     
                             
-                            <Route
-                                path='/login-map' 
-                                element={
-                                    <ProtectedRoute 
-                                        roles={['admin']} 
-                                        isAuthenticated={isAuthenticated} 
-                                        userRole={userRole} 
-                                        authLoading={authLoading}
-                                    >
-                                        <LoginMap authToken={authToken} />
-                                    </ProtectedRoute>
-                                } 
-                            />
+                            <Route path='/login-map' element={<ProtectedRoute roles={['admin']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><LoginMap authToken={authToken} /></ProtectedRoute>}/>
                             
-                            <Route path="*" element={<ProtectedRoute roles={['admin', 'propietario']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><Consorcios API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+                            <Route path="*" element={<ProtectedRoute roles={['admin']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><Consorcios API_BASE_URL={API_BASE_URL} /></ProtectedRoute>} />
+
+                            <Route path="/admin" element={<ProtectedRoute roles={['admin']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><AdminDashboard /></ProtectedRoute>} />
+                            <Route path='/edit-user/:id' element={<ProtectedRoute roles={['admin']} isAuthenticated={isAuthenticated} userRole={userRole} authLoading={authLoading}><EditUserForm /></ProtectedRoute>} />
                         </Routes>
                     </Container>
                 </>
