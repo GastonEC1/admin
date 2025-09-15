@@ -9,8 +9,7 @@ const PORT = process.env.PORT || 5000;
 
 const corsOptions = {
     origin: [
-        'https://refactored-xylophone-jv659gpjqq62jqr5-3000.app.github.dev', 
-        'http://localhost:3000'
+        'https://prueba-3-1-nmrz.onrender.com'
     ],
     optionsSuccessStatus: 200
 };
