@@ -62,36 +62,55 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ msg: "Credenciales inválidas" });
     }
 
-    // Obtener la IP y guardar el historial de inicio de sesión
+    // Inicializa las variables con valores seguros por defecto
+    let lat = null;
+    let lon = null;
+    let country_name = null;
+    let city = null;
+
+    // Obtener la IP y manejar la geolocalización
     const ipAddress =
       req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+
     try {
       const geoResponse = await axios.get(
         `https://ipapi.co/${ipAddress}/json/`
       );
-      const { country_name, city, latitude, longitude } = geoResponse.data;
+      const { latitude, longitude, country_name: apiCountry, city: apiCity } = geoResponse.data;
 
-      const loginHistory = new LoginHistory({
-        user: user.id,
-        ipAddress: ipAddress,
-        country: country_name,
-        city: city,
-        lat: latitude,
-        lon: longitude,
-      });
-
-      await loginHistory.save();
+      // Asigna los valores solo si existen en la respuesta de la API
+      if (latitude && longitude) {
+        lat = latitude;
+        lon = longitude;
+        country_name = apiCountry;
+        city = apiCity;
+      }
+      
+      console.log('Datos de la API de geolocalización:', geoResponse.data);
     } catch (geoErr) {
+      // Si la llamada a la API falla, los valores se mantienen en 'null'
       console.error(
-        "Error al obtener la geolocalización o guardar el historial:",
-        geoErr
+        "Error al obtener la geolocalización:",
+        geoErr.message
       );
     }
+
+    // Crea el objeto de historial de inicio de sesión
+    const loginHistory = new LoginHistory({
+      user: user.id,
+      ipAddress: ipAddress,
+      country: country_name,
+      city: city,
+      lat: lat,
+      lon: lon,
+    });
+
+    await loginHistory.save();
 
     const payload = {
       user: {
         id: user.id,
-        rol: user.rol 
+        rol: user.rol,
       },
     };
 
@@ -101,7 +120,6 @@ exports.loginUser = async (req, res) => {
       { expiresIn: "1h" },
       (err, token) => {
         if (err) throw err;
-        // Se añade el nombre del usuario a la respuesta
         res.json({ token, nombre: user.nombre });
       }
     );
@@ -111,6 +129,18 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+exports.getLoginHistory = async (req, res) => {
+  try {
+    const history = await LoginHistory.find()
+      .populate("user", "nombre")
+      .sort({ timestamp: -1 });
+
+    res.status(200).json(history);
+  } catch (error) {
+    console.error("Error al obtener el historial de login:", error);
+    res.status(500).json({ msg: "Error del servidor" });
+  }
+};
 exports.getAuthenticatedUser = async (req, res) => {
   try {
 

@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const BACKEND_BASE_URL =
-  "https://prueba-3-8t74.onrender.com";
+  "https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev";
 
 const LoginMap = ({ authToken }) => {
   const [history, setHistory] = useState([]);
@@ -67,10 +67,12 @@ const LoginMap = ({ authToken }) => {
       return;
     }
 
+    // Si ya hay una instancia del mapa, la eliminamos antes de crear una nueva
     if (mapInstanceRef.current) {
       mapInstanceRef.current.remove();
     }
 
+    // Creamos una nueva instancia del mapa y la guardamos en la referencia
     mapInstanceRef.current = L.map(mapRef.current).setView([0, 0], 2);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -80,38 +82,35 @@ const LoginMap = ({ authToken }) => {
 
     // Añadir marcadores para cada punto en el historial
     history.forEach((login) => {
-    // AÑADE ESTA LÍNEA CLAVE
-    // Asegúrate de que las coordenadas lat y lon existan antes de usarlas
-    if (login.lat && login.lon) { 
-        const marker = L.marker([login.lat, login.lon]).addTo(mapInstanceRef.current);
-
-        if (login.user && login.user.nombre) {
-            marker.bindPopup(`
-                <strong>Usuario: ${login.user.nombre}</strong><br/>
-                <hr style="margin: 5px 0;" />
-                Ubicación: ${login.city}, ${login.country}<br/>
-                IP: ${login.ipAddress}<br/>
-                Fecha: ${new Date(login.timestamp).toLocaleString()}
-            `);
-        } else {
-            // Opcional: marcador con información parcial si faltan los datos del usuario
-            marker.bindPopup(`
-                <strong>Usuario no encontrado</strong><br/>
-                <hr style="margin: 5px 0;" />
-                IP: ${login.ipAddress}<br/>
-                Fecha: ${new Date(login.timestamp).toLocaleString()}
-            `);
-        }
+    // AÑADE ESTA COMPROBACIÓN
+    if (login.user && login.user.nombre) {
+        const marker = L.marker([login.lat, login.lon]).addTo(
+            mapInstanceRef.current
+        );
+        marker.bindPopup(`
+            <strong>Usuario: ${login.user.nombre}</strong><br/>
+            <hr style="margin: 5px 0;" />
+            Ubicación: ${login.city}, ${login.country}<br/>
+            IP: ${login.ipAddress}<br/>
+            Fecha: ${new Date(login.timestamp).toLocaleString()}
+        `);
     } else {
-        // Opcional: un mensaje de advertencia para saber cuándo faltan los datos
-        console.warn('Saltando marcador por falta de coordenadas:', login);
+        // Opcional: Si los datos del usuario no están, puedes agregar un marcador genérico
+        const marker = L.marker([login.lat, login.lon]).addTo(
+            mapInstanceRef.current
+        );
+        marker.bindPopup(`
+            <strong>Usuario no encontrado</strong><br/>
+            <hr style="margin: 5px 0;" />
+            IP: ${login.ipAddress}<br/>
+            Fecha: ${new Date(login.timestamp).toLocaleString()}
+        `);
     }
 });
+
     // Centrar el mapa en el último marcador
-    if (history[0] && history[0].lat && history[0].lon) {
+    if (history[0]) {
       mapInstanceRef.current.flyTo([history[0].lat, history[0].lon], 5);
-    }else{
-      console.warn("No hay datos de coordenadas válidos para centrar el mapa.");
     }
 
     // La función de limpieza se ejecuta cuando el componente se desmonta
