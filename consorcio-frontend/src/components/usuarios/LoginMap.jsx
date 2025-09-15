@@ -20,7 +20,8 @@ const LoginMap = ({ authToken }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const mapRef = useRef(null);
-  const mapInstanceRef = useRef(null); // Referencia para guardar la instancia del mapa
+  const mapInstanceRef = useRef(null);
+  const [selectedLogin, setSelectedLogin] = useState(null); // ✨ NUEVO ESTADO: Guarda el login seleccionado
 
   // useEffect para cargar los datos del historial
   useEffect(() => {
@@ -60,53 +61,47 @@ const LoginMap = ({ authToken }) => {
     fetchLoginHistory();
   }, [authToken]);
 
-
-
-
+  // Logica para centrar el mapa
   useEffect(() => {
-    // No hacemos nada si no hay datos o el div no está listo
+    // Si no hay datos, no hacemos nada
     if (!history.length || !mapRef.current) {
       return;
     }
+   
+    // Si no existe la instancia del mapa, la creamos
+    if (!mapInstanceRef.current) {
+      mapInstanceRef.current = L.map(mapRef.current).setView([0, 0], 2);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(mapInstanceRef.current);
 
-    // Si ya hay una instancia del mapa, la eliminamos antes de crear una nueva
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-    }
-
-    // Creamos una nueva instancia del mapa y la guardamos en la referencia
-    mapInstanceRef.current = L.map(mapRef.current).setView([0, 0], 2);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="[http://osm.org/copyright](http://osm.org/copyright)">OpenStreetMap</a> contributors',
-    }).addTo(mapInstanceRef.current);
-
-    // Añadir marcadores para cada punto en el historial
-    history.forEach((login) => {
-    // ✅ COMPROBACIÓN CLAVE: Verifica si las coordenadas existen
-      if (login.lat && login.lon) {
-        const marker = L.marker([login.lat, login.lon]).addTo(
+      history.forEach((login) => {
+        if (login.lat && login.lon) {
+          const marker = L.marker([login.lat, login.lon]).addTo(
             mapInstanceRef.current
-        );
-        marker.bindPopup(`
-            <strong>Usuario: ${login.user?.nombre || 'No encontrado'}</strong><br/>
+          );
+          marker.bindPopup(`
+            <strong>Usuario: ${login.user?.nombre || "No encontrado"}</strong><br/>
             <hr style="margin: 5px 0;" />
-            Ubicación: ${login.city || 'Desconocida'}, ${login.country || 'Desconocido'}<br/>
+            Ubicación: ${login.city || "Desconocida"}, ${login.country || "Desconocido"}<br/>
             IP: ${login.ipAddress}<br/>
             Fecha: ${new Date(login.timestamp).toLocaleString()}
-        `);
-      } else {
-        // Opcional: Registra un mensaje si faltan las coordenadas
-        console.warn("Saltando marcador por falta de coordenadas:", login);
-      }
-    });
+          `);
+        } else {
+          console.warn("Saltando marcador por falta de coordenadas:", login);
+        }
+      });
+    }
 
-    // ✅ COMPROBACIÓN CLAVE: Centra el mapa solo si el primer registro tiene coordenadas válidas
-    if (history.length > 0 && history[0].lat && history[0].lon) {
-      mapInstanceRef.current.flyTo([history[0].lat, history[0].lon], 5);
-    } else {
-      console.warn("No hay datos de coordenadas válidos para centrar el mapa.");
+    // ✨ NUEVA LÓGICA: Centra el mapa en el usuario seleccionado
+    if (selectedLogin && selectedLogin.lat && selectedLogin.lon) {
+        mapInstanceRef.current.flyTo([selectedLogin.lat, selectedLogin.lon], 10);
+    } else if (history.length > 0 && history[0].lat && history[0].lon) {
+        // Lógica para centrar el mapa en el primer registro si no hay uno seleccionado
+        mapInstanceRef.current.flyTo([history[0].lat, history[0].lon], 5);
+    } else {
+        console.warn("No hay datos de coordenadas válidos para centrar el mapa.");
     }
 
     // La función de limpieza se ejecuta cuando el componente se desmonta
@@ -116,9 +111,12 @@ const LoginMap = ({ authToken }) => {
         mapInstanceRef.current = null;
       }
     };
-  }, [history]); // La dependencia clave es 'history'
+  }, [history, selectedLogin]); // ✨ NUEVA DEPENDENCIA: Reacciona cuando se selecciona un login
 
-
+  // ✨ NUEVO HANDLER: Función para manejar el clic en la tabla
+  const handleRowClick = (login) => {
+    setSelectedLogin(login);
+  };
 
   if (loading) {
     return (
@@ -172,7 +170,11 @@ const LoginMap = ({ authToken }) => {
             </thead>
             <tbody>
               {history.slice(0, 10).map((login, index) => (
-                <tr key={index}>
+                <tr
+                  key={index}
+                  onClick={() => handleRowClick(login)} // ✨ AÑADE EL EVENTO CLICK
+                  style={{ cursor: "pointer" }}
+                >
                   <td>{login.user?.nombre}</td>
                   <td>{new Date(login.timestamp).toLocaleString()}</td>
                   <td>{login.lat}</td>

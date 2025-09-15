@@ -1,192 +1,163 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Card, Spinner, Alert } from "react-bootstrap";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const LoginHistory = require("../models/loginHistory");
+const axios = require("axios");
 
-// Esenciales para que los iconos de los marcadores funcionen
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+exports.registerUser = async (req, res) => {
+    const { nombre, email, password, rol } = req.body;
 
-const BACKEND_BASE_URL =
-  "https://prueba-3-8t74.onrender.com";
+    try {
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ msg: "El usuario ya existe" });
+        }
 
-const LoginMap = ({ authToken }) => {
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const mapRef = useRef(null);
-  const mapInstanceRef = useRef(null);
-  const [selectedLogin, setSelectedLogin] = useState(null); // ✨ NUEVO ESTADO: Guarda el login seleccionado
+        user = new User({
+            nombre,
+            email,
+            password,
+            rol,
+        });
 
-  // useEffect para cargar los datos del historial
-  useEffect(() => {
-    if (!authToken) {
-      setError("No hay token de autenticación. Por favor, inicia sesión.");
-      setLoading(false);
-      return;
-    }
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
 
-    const fetchLoginHistory = async () => {
-      try {
-        const response = await fetch(
-          `${BACKEND_BASE_URL}/api/auth/login-history`,
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
+        await user.save();
 
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(
-            data.msg || "Error al obtener el historial de inicios de sesión."
-          );
-        }
-        setHistory(data);
-      } catch (err) {
-        console.error("Error al obtener el historial:", err);
-        setError(
-          err.message || "Ocurrió un error inesperado al cargar el historial."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLoginHistory();
-  }, [authToken]);
+        const payload = {
+            user: {
+                id: user.id,
+                rol: user.rol,
+            },
+        };
 
-  // Logica para centrar el mapa
-  useEffect(() => {
-    // Si no hay datos, no hacemos nada
-    if (!history.length || !mapRef.current) {
-      return;
-    }
-   
-    // Si no existe la instancia del mapa, la creamos
-    if (!mapInstanceRef.current) {
-      mapInstanceRef.current = L.map(mapRef.current).setView([0, 0], 2);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(mapInstanceRef.current);
-
-      history.forEach((login) => {
-        if (login.lat && login.lon) {
-          const marker = L.marker([login.lat, login.lon]).addTo(
-            mapInstanceRef.current
-          );
-          marker.bindPopup(`
-            <strong>Usuario: ${login.user?.nombre || "No encontrado"}</strong><br/>
-            <hr style="margin: 5px 0;" />
-            Ubicación: ${login.city || "Desconocida"}, ${login.country || "Desconocido"}<br/>
-            IP: ${login.ipAddress}<br/>
-            Fecha: ${new Date(login.timestamp).toLocaleString()}
-          `);
-        } else {
-          console.warn("Saltando marcador por falta de coordenadas:", login);
-        }
-      });
-    }
-
-    // ✨ NUEVA LÓGICA: Centra el mapa en el usuario seleccionado
-    if (selectedLogin && selectedLogin.lat && selectedLogin.lon) {
-        mapInstanceRef.current.flyTo([selectedLogin.lat, selectedLogin.lon], 10);
-    } else if (history.length > 0 && history[0].lat && history[0].lon) {
-        // Lógica para centrar el mapa en el primer registro si no hay uno seleccionado
-        mapInstanceRef.current.flyTo([history[0].lat, history[0].lon], 5);
-    } else {
-        console.warn("No hay datos de coordenadas válidos para centrar el mapa.");
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" },
+            (err, token) => {
+                if (err) throw err;
+                res.json({ token });
+            }
+        );
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Error en el servidor");
     }
-
-    // La función de limpieza se ejecuta cuando el componente se desmonta
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [history, selectedLogin]); // ✨ NUEVA DEPENDENCIA: Reacciona cuando se selecciona un login
-
-  // ✨ NUEVO HANDLER: Función para manejar el clic en la tabla
-  const handleRowClick = (login) => {
-    setSelectedLogin(login);
-  };
-
-  if (loading) {
-    return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ height: "50vh" }}
-      >
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </Spinner>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="danger" className="text-center mt-4">
-        {error}
-      </Alert>
-    );
-  }
-
-  if (history.length === 0) {
-    return (
-      <Alert variant="info" className="text-center mt-4">
-        No se encontraron registros de inicio de sesión.
-      </Alert>
-    );
-  }
-
-  return (
-    <Card className="shadow-lg mt-4">
-      <Card.Body>
-        <div
-          ref={mapRef}
-          style={{ height: "500px", width: "100%", borderRadius: "8px" }}
-        ></div>
-      </Card.Body>
-
-      <Card.Footer>
-        <h5 className="text-center mt-3">Historial Detallado</h5>
-        <div className="table-responsive">
-          <table className="table table-striped table-hover mt-3">
-            <thead>
-              <tr>
-                <th>Usuario</th>
-                <th>Fecha y Hora</th>
-                <th>Latitud</th>
-                <th>Longitud</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.slice(0, 10).map((login, index) => (
-                <tr
-                  key={index}
-                  onClick={() => handleRowClick(login)} // ✨ AÑADE EL EVENTO CLICK
-                  style={{ cursor: "pointer" }}
-                >
-                  <td>{login.user?.nombre}</td>
-                  <td>{new Date(login.timestamp).toLocaleString()}</td>
-                  <td>{login.lat}</td>
-                  <td>{login.lon}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card.Footer>
-    </Card>
-  );
 };
 
-export default LoginMap;
+exports.loginUser = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        let user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ msg: "Credenciales inválidas" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ msg: "Credenciales inválidas" });
+        }
+
+        let lat = null;
+        let lon = null;
+        let country_name = null;
+        let city = null;
+
+        // Ejemplo de cómo obtener la IP correctamente
+    const ipAddressHeader = req.headers["x-forwarded-for"];
+    const ipAddress = ipAddressHeader ? ipAddressHeader.split(',')[0].trim() : req.socket.remoteAddress;
+        try {
+            const geoResponse = await axios.get(
+                `https://ipapi.co/${ipAddress}/json/`
+            );
+            const { latitude, longitude, country_name: apiCountry, city: apiCity } = geoResponse.data;
+            console.log('Datos de la API de geolocalización:', geoResponse.data);
+
+            if (latitude && longitude) {
+                lat = latitude;
+                lon = longitude;
+                country_name = apiCountry;
+                city = apiCity;
+            }
+        } catch (geoErr) {
+            console.error(
+                "Error al obtener la geolocalización:",
+                geoErr.message
+            );
+        }
+
+        const loginHistory = new LoginHistory({
+            user: user.id,
+            ipAddress: ipAddress,
+            country: country_name,
+            city: city,
+            lat: lat,
+            lon: lon,
+        });
+
+        await loginHistory.save();
+
+        const payload = {
+            user: {
+                id: user.id,
+                rol: user.rol,
+            },
+        };
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" },
+            (err, token) => {
+                if (err) throw err;
+                res.json({ token, nombre: user.nombre });
+            }
+        );
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Error en el servidor");
+    }
+};
+
+exports.getAuthenticatedUser = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ msg: "Usuario no autenticado." });
+        }
+
+        const user = await User.findById(req.user.id).select("-password");
+        if (!user) {
+            return res.status(404).json({ msg: "Usuario no encontrado." });
+        }
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Error en el servidor");
+    }
+};
+
+exports.getLoginHistory = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ msg: 'Usuario no autenticado.' });
+        }
+
+        const user = await User.findById(req.user.id).select('rol');
+        if (!user || user.rol !== 'admin') {
+            return res.status(403).json({ msg: 'Acceso denegado. Solo administradores pueden ver el historial.' });
+        }
+
+        const history = await LoginHistory.find({})
+            .populate('user', 'nombre') 
+            .sort({ timestamp: -1 });
+
+        res.json(history);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Error en el servidor');
+    }
+};
