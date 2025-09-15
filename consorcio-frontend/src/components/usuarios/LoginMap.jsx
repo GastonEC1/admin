@@ -21,7 +21,8 @@ const LoginMap = ({ authToken }) => {
   const [error, setError] = useState(null);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const [selectedLogin, setSelectedLogin] = useState(null); // ✨ NUEVO ESTADO: Guarda el login seleccionado
+  // ✨ NUEVO ESTADO: Guarda el login seleccionado
+  const [selectedLogin, setSelectedLogin] = useState(null);
 
   // useEffect para cargar los datos del historial
   useEffect(() => {
@@ -61,14 +62,12 @@ const LoginMap = ({ authToken }) => {
     fetchLoginHistory();
   }, [authToken]);
 
-  // Logica para centrar el mapa
+  // Lógica para centrar el mapa
   useEffect(() => {
-    // Si no hay datos, no hacemos nada
     if (!history.length || !mapRef.current) {
       return;
     }
    
-    // Si no existe la instancia del mapa, la creamos
     if (!mapInstanceRef.current) {
       mapInstanceRef.current = L.map(mapRef.current).setView([0, 0], 2);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -111,7 +110,8 @@ const LoginMap = ({ authToken }) => {
         mapInstanceRef.current = null;
       }
     };
-  }, [history, selectedLogin]); // ✨ NUEVA DEPENDENCIA: Reacciona cuando se selecciona un login
+  // ✨ NUEVA DEPENDENCIA: Reacciona cuando se selecciona un login
+  }, [history, selectedLogin]); 
 
   // ✨ NUEVO HANDLER: Función para manejar el clic en la tabla
   const handleRowClick = (login) => {
