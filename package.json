@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "start":"node consorcio-api/server.js"
+    "jsonwebtoken": "^9.0.2"
   }
 }
