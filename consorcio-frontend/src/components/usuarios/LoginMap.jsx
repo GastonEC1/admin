@@ -60,13 +60,9 @@ const LoginMap = ({ authToken }) => {
     fetchLoginHistory();
   }, [authToken]);
 
----
 
-### **Lógica del Mapa Corregida**
 
-Aquí está el bloque `useEffect` que contiene las correcciones clave.
 
-```jsx
   useEffect(() => {
     // No hacemos nada si no hay datos o el div no está listo
     if (!history.length || !mapRef.current) {
@@ -122,11 +118,8 @@ Aquí está el bloque `useEffect` que contiene las correcciones clave.
     };
   }, [history]); // La dependencia clave es 'history'
 
----
 
-### **Renderizado del Componente**
 
-```jsx
   if (loading) {
     return (
       <div
