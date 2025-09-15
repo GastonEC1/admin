@@ -66,8 +66,9 @@ exports.loginUser = async (req, res) => {
         let country_name = null;
         let city = null;
 
-        const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-
+        // Ejemplo de cómo obtener la IP correctamente
+    const ipAddressHeader = req.headers["x-forwarded-for"];
+    const ipAddress = ipAddressHeader ? ipAddressHeader.split(',')[0].trim() : req.socket.remoteAddress;
         try {
             const geoResponse = await axios.get(
                 `https://ipapi.co/${ipAddress}/json/`
