@@ -110,6 +110,8 @@ const LoginMap = ({ authToken }) => {
     // Centrar el mapa en el último marcador
     if (history[0] && history[0].lat && history[0].lon) {
       mapInstanceRef.current.flyTo([history[0].lat, history[0].lon], 5);
+    }else{
+      console.warn("No hay datos de coordenadas válidos para centrar el mapa.");
     }
 
     // La función de limpieza se ejecuta cuando el componente se desmonta
