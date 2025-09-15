@@ -21,7 +21,7 @@ function EditConsorcio() {
     const [errorMessage, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(true);
 
-    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api/consorcios';
+    const backendUrl = 'https://prueba-3-8t74.onrender.com/api/consorcios';
     const token = localStorage.getItem('token');
 
     useEffect(() => {

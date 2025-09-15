@@ -4,7 +4,7 @@ import EditUserForm from './EditUserForm.jsx';
 import { FaTrash, FaEdit } from 'react-icons/fa';
 
 // The base URL for the backend API
-const BACKEND_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev';
+const BACKEND_BASE_URL = 'https://prueba-3-8t74.onrender.com';
 
 // Main component: AdminDashboard
 const AdminDashboard = () => {

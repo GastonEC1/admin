@@ -29,7 +29,7 @@ function ActivoDetail() {
     const [maintenanceError, setMaintenanceError] = useState('');
 
 
-    const backendBaseUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api';
+    const backendBaseUrl = 'https://prueba-3-8t74.onrender.com/api';
     const activosBackendUrl = `${backendBaseUrl}/activos`;
     const emailBackendUrl = `${backendBaseUrl}/email/send-maintenance-notification`;
     const token = localStorage.getItem('token');

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 // The base URL for the backend API
-const BACKEND_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev';
+const BACKEND_BASE_URL = 'https://prueba-3-8t74.onrender.com';
 
 const EditUserForm = ({ user, onUserUpdated, onCancel, showMessage }) => {
   const [formData, setFormData] = useState({

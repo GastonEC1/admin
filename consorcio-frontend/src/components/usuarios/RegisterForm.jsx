@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaUserPlus } from 'react-icons/fa'; // Importar iconos
 
 // ¡IMPORTANTE! VERIFICA ESTA URL. Debe ser la URL de tu backend en Codespaces, terminando en /api
-const API_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api'; 
+const API_BASE_URL = 'https://prueba-3-8t74.onrender.com/api'; 
 
 function RegisterForm() {
     const [nombre, setNombre] = useState('');

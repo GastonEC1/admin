@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const BACKEND_BASE_URL =
-  "https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev";
+  "https://prueba-3-8t74.onrender.com";
 
 const LoginMap = ({ authToken }) => {
   const [history, setHistory] = useState([]);

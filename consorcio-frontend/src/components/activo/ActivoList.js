@@ -6,7 +6,7 @@ import { Pagination } from 'react-bootstrap';
 
 const ActivoList = () => {
 
-  const API_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api';
+  const API_BASE_URL = 'https://prueba-3-8t74.onrender.com/api';
   
   const [activos, setActivos] = useState([]);
   const [error, setError] = useState(null);

@@ -9,7 +9,7 @@ function Activos() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api/activos';
+    const backendUrl = 'https://prueba-3-8t74.onrender.com/api/activos';
     const token = localStorage.getItem('token');
 
     axios.get(backendUrl, {

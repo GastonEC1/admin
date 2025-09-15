@@ -22,7 +22,7 @@ function Consorcios() {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [consorcioToDelete, setConsorcioToDelete] = useState(null);
 
-    const backendUrl = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev/api/consorcios';
+    const backendUrl = 'https://prueba-3-8t74.onrender.com/api/consorcios';
     const token = localStorage.getItem('token');
 
     // Función para manejar la carga de datos
