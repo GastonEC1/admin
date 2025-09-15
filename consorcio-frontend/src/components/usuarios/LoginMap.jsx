@@ -67,12 +67,10 @@ const LoginMap = ({ authToken }) => {
       return;
     }
 
-    // Si ya hay una instancia del mapa, la eliminamos antes de crear una nueva
     if (mapInstanceRef.current) {
       mapInstanceRef.current.remove();
     }
 
-    // Creamos una nueva instancia del mapa y la guardamos en la referencia
     mapInstanceRef.current = L.map(mapRef.current).setView([0, 0], 2);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -110,7 +108,7 @@ const LoginMap = ({ authToken }) => {
     }
 });
     // Centrar el mapa en el último marcador
-    if (history[0]) {
+    if (history[0] && history[0].lat && history[0].lon) {
       mapInstanceRef.current.flyTo([history[0].lat, history[0].lon], 5);
     }
 
