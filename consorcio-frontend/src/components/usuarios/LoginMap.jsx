@@ -82,32 +82,33 @@ const LoginMap = ({ authToken }) => {
 
     // Añadir marcadores para cada punto en el historial
     history.forEach((login) => {
-    // AÑADE ESTA COMPROBACIÓN
-    if (login.user && login.user.nombre) {
-        const marker = L.marker([login.lat, login.lon]).addTo(
-            mapInstanceRef.current
-        );
-        marker.bindPopup(`
-            <strong>Usuario: ${login.user.nombre}</strong><br/>
-            <hr style="margin: 5px 0;" />
-            Ubicación: ${login.city}, ${login.country}<br/>
-            IP: ${login.ipAddress}<br/>
-            Fecha: ${new Date(login.timestamp).toLocaleString()}
-        `);
+    // AÑADE ESTA LÍNEA CLAVE
+    // Asegúrate de que las coordenadas lat y lon existan antes de usarlas
+    if (login.lat && login.lon) { 
+        const marker = L.marker([login.lat, login.lon]).addTo(mapInstanceRef.current);
+
+        if (login.user && login.user.nombre) {
+            marker.bindPopup(`
+                <strong>Usuario: ${login.user.nombre}</strong><br/>
+                <hr style="margin: 5px 0;" />
+                Ubicación: ${login.city}, ${login.country}<br/>
+                IP: ${login.ipAddress}<br/>
+                Fecha: ${new Date(login.timestamp).toLocaleString()}
+            `);
+        } else {
+            // Opcional: marcador con información parcial si faltan los datos del usuario
+            marker.bindPopup(`
+                <strong>Usuario no encontrado</strong><br/>
+                <hr style="margin: 5px 0;" />
+                IP: ${login.ipAddress}<br/>
+                Fecha: ${new Date(login.timestamp).toLocaleString()}
+            `);
+        }
     } else {
-        // Opcional: Si los datos del usuario no están, puedes agregar un marcador genérico
-        const marker = L.marker([login.lat, login.lon]).addTo(
-            mapInstanceRef.current
-        );
-        marker.bindPopup(`
-            <strong>Usuario no encontrado</strong><br/>
-            <hr style="margin: 5px 0;" />
-            IP: ${login.ipAddress}<br/>
-            Fecha: ${new Date(login.timestamp).toLocaleString()}
-        `);
+        // Opcional: un mensaje de advertencia para saber cuándo faltan los datos
+        console.warn('Saltando marcador por falta de coordenadas:', login);
     }
 });
-
     // Centrar el mapa en el último marcador
     if (history[0]) {
       mapInstanceRef.current.flyTo([history[0].lat, history[0].lon], 5);
