@@ -1,33 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Container, Table, Alert } from 'react-bootstrap';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Container, Table, Alert } from "react-bootstrap";
 
 function Inquilinos() {
   const [inquilinos, setInquilinos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const backendUrl = 'https://prueba-3-8t74.onrender.com/api/inquilinos';
-    const token = localStorage.getItem('token');
+    const backendUrl = "https://gestion-3kgo.onrender.com/api/inquilinos";
+    const token = localStorage.getItem("token");
 
-    axios.get(backendUrl, {
-      headers: { 'x-auth-token': token }
-    })
-    .then(response => {
-      if (Array.isArray(response.data)) {
-        setInquilinos(response.data);
-      } else {
-        console.error('La API no devolvió un array para inquilinos:', response.data);
-        setInquilinos([]);
-      }
-      setLoading(false);
-    })
-    .catch(error => {
-      console.error('Hubo un error al cargar los inquilinos:', error);
-      setError('Error al cargar los inquilinos. Por favor, revisa la conexión.');
-      setLoading(false);
-    });
+    axios
+      .get(backendUrl, {
+        headers: { "x-auth-token": token },
+      })
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          setInquilinos(response.data);
+        } else {
+          console.error(
+            "La API no devolvió un array para inquilinos:",
+            response.data
+          );
+          setInquilinos([]);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Hubo un error al cargar los inquilinos:", error);
+        setError(
+          "Error al cargar los inquilinos. Por favor, revisa la conexión."
+        );
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
@@ -62,14 +68,16 @@ function Inquilinos() {
             </tr>
           </thead>
           <tbody>
-            {inquilinos.map(inquilino => (
+            {inquilinos.map((inquilino) => (
               <tr key={inquilino._id}>
                 <td>{inquilino.nombre}</td>
                 <td>{inquilino.apellido}</td>
                 <td>{inquilino.unidad}</td>
                 <td>{inquilino.telefono}</td>
                 <td>{inquilino.email}</td>
-                <td>{inquilino.consorcio ? inquilino.consorcio.nombre : 'N/A'}</td>
+                <td>
+                  {inquilino.consorcio ? inquilino.consorcio.nombre : "N/A"}
+                </td>
               </tr>
             ))}
           </tbody>

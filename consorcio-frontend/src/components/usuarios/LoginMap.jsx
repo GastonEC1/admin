@@ -12,7 +12,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const BACKEND_BASE_URL = "https://prueba-3-8t74.onrender.com";
+const BACKEND_BASE_URL = "https://gestion-3kgo.onrender.com";
 
 const LoginMap = ({ authToken }) => {
   const [history, setHistory] = useState([]);

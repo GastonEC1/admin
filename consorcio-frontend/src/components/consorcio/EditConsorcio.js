@@ -20,7 +20,7 @@ function EditConsorcio() {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const backendUrl = "https://prueba-3-8t74.onrender.com/api/consorcios";
+  const backendUrl = "https://gestion-3kgo.onrender.com/api/consorcios";
   const token = localStorage.getItem("token");
 
   useEffect(() => {

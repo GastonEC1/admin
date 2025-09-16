@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import EditUserForm from './EditUserForm.jsx';
-import { FaTrash, FaEdit } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import EditUserForm from "./EditUserForm.jsx";
+import { FaTrash, FaEdit } from "react-icons/fa";
 
 // The base URL for the backend API
-const BACKEND_BASE_URL = 'https://prueba-3-8t74.onrender.com';
+const BACKEND_BASE_URL = "https://gestion-3kgo.onrender.com";
 
 // Main component: AdminDashboard
 const AdminDashboard = () => {
@@ -14,40 +14,44 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   // Function to show a temporary message
   const showMessage = (msg) => {
     setMessage(msg);
-    setTimeout(() => setMessage(''), 5000);
+    setTimeout(() => setMessage(""), 5000);
   };
 
   // Fetches users from the API
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
 
     if (!token) {
-      setError('No se encontró el token de autenticación. Por favor, inicia sesión.');
+      setError(
+        "No se encontró el token de autenticación. Por favor, inicia sesión."
+      );
       setLoading(false);
       return;
     }
 
     try {
-      const res = await axios.get(
-        `${BACKEND_BASE_URL}/api/admin/users`,
-        {
-          headers: { 'Authorization': `Bearer ${token}` }, // Corrected header
-        }
-      );
+      const res = await axios.get(`${BACKEND_BASE_URL}/api/admin/users`, {
+        headers: { Authorization: `Bearer ${token}` }, // Corrected header
+      });
       setUsers(res.data);
     } catch (err) {
-      console.error('Error al cargar los usuarios:', err.response);
-      if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-        setError('Acceso no autorizado. Por favor, inicia sesión de nuevo.');
+      console.error("Error al cargar los usuarios:", err.response);
+      if (
+        err.response &&
+        (err.response.status === 401 || err.response.status === 403)
+      ) {
+        setError("Acceso no autorizado. Por favor, inicia sesión de nuevo.");
       } else {
-        setError('Ocurrió un error al cargar los usuarios. Revisa tu conexión y el estado del servidor.');
+        setError(
+          "Ocurrió un error al cargar los usuarios. Revisa tu conexión y el estado del servidor."
+        );
       }
     } finally {
       setLoading(false);
@@ -71,20 +75,22 @@ const AdminDashboard = () => {
     if (!userToDelete) return;
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (!token) {
-        setError('No se encontró el token de autenticación.');
+        setError("No se encontró el token de autenticación.");
         return;
       }
       await axios.delete(
         `${BACKEND_BASE_URL}/api/admin/users/${userToDelete}`,
-        { headers: { 'Authorization': `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setUsers(users.filter((user) => user._id !== userToDelete));
-      showMessage('Usuario eliminado con éxito.');
+      showMessage("Usuario eliminado con éxito.");
     } catch (err) {
-      console.error('Error al eliminar el usuario:', err.response);
-      showMessage('Error al eliminar el usuario. Revisa la consola para más detalles.');
+      console.error("Error al eliminar el usuario:", err.response);
+      showMessage(
+        "Error al eliminar el usuario. Revisa la consola para más detalles."
+      );
     } finally {
       setUserToDelete(null);
     }
@@ -94,7 +100,7 @@ const AdminDashboard = () => {
   const handleUserUpdated = () => {
     setEditingUser(null);
     fetchUsers();
-    showMessage('Usuario actualizado con éxito.');
+    showMessage("Usuario actualizado con éxito.");
   };
 
   // Handler to cancel editing
@@ -104,7 +110,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="container mt-5">
-     
       <style>
         {`@import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css');`}
       </style>
@@ -125,8 +130,8 @@ const AdminDashboard = () => {
           )}
 
           {editingUser ? (
-            <EditUserForm 
-              user={editingUser} 
+            <EditUserForm
+              user={editingUser}
               onUserUpdated={handleUserUpdated}
               onCancel={handleCancel}
               showMessage={showMessage}
@@ -149,30 +154,34 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody>
                     {users.length > 0 ? (
-                      users.map(user => (
+                      users.map((user) => (
                         <tr key={user._id}>
                           <td>{user.nombre}</td>
                           <td>{user.email}</td>
                           <td>{user.rol}</td>
                           <td>
-                            <button 
+                            <button
                               onClick={() => setEditingUser(user)}
                               className="btn btn-sm btn-outline-info me-2"
                             >
-                              <FaEdit/>Editar
+                              <FaEdit />
+                              Editar
                             </button>
-                            <button 
+                            <button
                               onClick={() => handleDelete(user._id)}
                               className="btn btn-sm btn-outline-danger"
                             >
-                              <FaTrash/>Eliminar
+                              <FaTrash />
+                              Eliminar
                             </button>
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="4" className="text-center text-muted">No hay usuarios para mostrar.</td>
+                        <td colSpan="4" className="text-center text-muted">
+                          No hay usuarios para mostrar.
+                        </td>
                       </tr>
                     )}
                   </tbody>
@@ -182,24 +191,43 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
-      
+
       {/* Custom Confirmation Modal */}
       {showConfirmModal && (
-        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1">
+        <div
+          className="modal d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          tabIndex="-1"
+        >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Confirmar Eliminación</h5>
-                <button type="button" className="btn-close" onClick={() => setShowConfirmModal(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowConfirmModal(false)}
+                ></button>
               </div>
               <div className="modal-body">
-                <p>¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.</p>
+                <p>
+                  ¿Estás seguro de que quieres eliminar este usuario? Esta
+                  acción no se puede deshacer.
+                </p>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowConfirmModal(false)}
+                >
                   Cancelar
                 </button>
-                <button type="button" className="btn btn-danger" onClick={confirmDelete}>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={confirmDelete}
+                >
                   Eliminar
                 </button>
               </div>

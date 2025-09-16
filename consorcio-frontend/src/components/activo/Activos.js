@@ -1,34 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Container, Table, Alert, Spinner } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Container, Table, Alert, Spinner } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 function Activos() {
   const [activos, setActivos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const backendUrl = 'https://prueba-3-8t74.onrender.com/api/activos';
-    const token = localStorage.getItem('token');
+    const backendUrl = "https://gestion-3kgo.onrender.com/api/activos";
+    const token = localStorage.getItem("token");
 
-    axios.get(backendUrl, {
-      headers: { 'x-auth-token': token }
-    })
-    .then(response => {
-      if (Array.isArray(response.data)) {
-        setActivos(response.data);
-      } else {
-        console.error('La API no devolvió un array para activos:', response.data);
-        setActivos([]);
-      }
-      setLoading(false);
-    })
-    .catch(error => {
-      console.error('Hubo un error al cargar los activos:', error);
-      setError('Error al cargar los activos. Por favor, revisa la conexión.');
-      setLoading(false);
-    });
+    axios
+      .get(backendUrl, {
+        headers: { "x-auth-token": token },
+      })
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          setActivos(response.data);
+        } else {
+          console.error(
+            "La API no devolvió un array para activos:",
+            response.data
+          );
+          setActivos([]);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Hubo un error al cargar los activos:", error);
+        setError("Error al cargar los activos. Por favor, revisa la conexión.");
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
@@ -64,18 +68,16 @@ function Activos() {
             </tr>
           </thead>
           <tbody>
-            {activos.map(activo => (
+            {activos.map((activo) => (
               <tr key={activo._id}>
                 <td>
-                  <Link to={`/activos/${activo._id}`}>
-                    {activo.nombre}
-                  </Link>
+                  <Link to={`/activos/${activo._id}`}>{activo.nombre}</Link>
                 </td>
-                <td>{activo.tipo || 'N/A'}</td>
-                <td>{activo.consorcio ? activo.consorcio.nombre : 'N/A'}</td>
+                <td>{activo.tipo || "N/A"}</td>
+                <td>{activo.consorcio ? activo.consorcio.nombre : "N/A"}</td>
                 <td>{activo.ubicacion}</td>
-                <td>{activo.marca || 'N/A'}</td>
-                <td>{activo.modelo || 'N/A'}</td>
+                <td>{activo.marca || "N/A"}</td>
+                <td>{activo.modelo || "N/A"}</td>
               </tr>
             ))}
           </tbody>
