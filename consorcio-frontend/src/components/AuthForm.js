@@ -13,7 +13,7 @@ import {
 // Replace with a custom icon or SVG if needed in your final project.
 const FaSignInAlt = () => <span>&#x1F512;</span>;
 
-const BACKEND_BASE_URL = "https://gestion-3kgo.onrender.com";
+const BACKEND_BASE_URL = "https://gestion-c8m6.onrender.com";
 
 const AuthForm = ({ onAuthSuccess }) => {
   const [email, setEmail] = useState("");
