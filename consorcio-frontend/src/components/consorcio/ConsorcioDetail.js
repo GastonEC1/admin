@@ -610,47 +610,65 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
             >
               <FaCalendarAlt className="me-2" /> Calendario de Eventos
             </Card.Header>
+
             <Card.Body>
-              <FullCalendar
-                plugins={[
-                  dayGridPlugin,
-                  interactionPlugin,
-                  timeGridPlugin,
-                  listPlugin,
-                ]}
-                initialView="dayGridMonth"
-                headerToolbar={{
-                  left: "prev,next today",
-                  center: "title",
-                  right: "dayGridMonth, timeGridWeek, timeGridDay, listWeek",
-                }}
-                events={calendario.map((evento) => ({
-                  id: evento._id,
-                  title: `${evento.tipo === "mantenimiento" ? "Mantenimiento" : evento.tipo === "evento" ? "Evento" : "Asamblea"}: ${evento.descripcion}`,
-                  date: evento.fecha,
-                  color:
-                    evento.tipo === "mantenimiento"
-                      ? "#0d6efd"
-                      : evento.tipo === "evento"
-                        ? "#198754"
-                        : "#6c757d",
-                  extendedProps: { ...evento },
-                }))}
-                dateClick={handleDateClick}
-                eventClick={handleEventClick}
-                eventDrop={handleEventDrop}
-                editable={true}
-                height="auto"
-              />
+              <div className="overflow-auto">
+                <FullCalendar
+                  plugins={[
+                    dayGridPlugin,
+                    interactionPlugin,
+                    timeGridPlugin,
+                    listPlugin,
+                  ]}
+                  initialView="dayGridMonth"
+                  headerToolbar={{
+                    left: "prev,next today",
+                    center: "title",
+                    right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+                  }}
+                  events={calendario.map((evento) => ({
+                    id: evento._id,
+                    title: `${
+                      evento.tipo === "mantenimiento"
+                        ? "Mantenimiento"
+                        : evento.tipo === "evento"
+                          ? "Evento"
+                          : "Asamblea"
+                    }: ${evento.descripcion}`,
+                    date: evento.fecha,
+                    color:
+                      evento.tipo === "mantenimiento"
+                        ? "#0d6efd"
+                        : evento.tipo === "evento"
+                          ? "#198754"
+                          : "#6c757d",
+                    extendedProps: { ...evento },
+                  }))}
+                  dateClick={handleDateClick}
+                  eventClick={handleEventClick}
+                  eventDrop={handleEventDrop}
+                  editable={true}
+                  height="auto"
+                  contentHeight="auto"
+                  aspectRatio={1.35} // Ajusta la proporción para móviles
+                  nowIndicator={true}
+                />
+              </div>
+
+              {/* Modal responsive */}
               <Modal
                 show={showEventoModal}
                 onHide={() => setShowEventoModal(false)}
+                centered
+                size="lg"
+                dialogClassName="modal-responsive"
               >
                 <Modal.Header closeButton>
                   <Modal.Title>
                     {modalMode === "add" ? "Agregar Evento" : "Editar Evento"}
                   </Modal.Title>
                 </Modal.Header>
+
                 <Form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -658,20 +676,40 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                   }}
                 >
                   <Modal.Body>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Fecha</Form.Label>
-                      <Form.Control
-                        type="date"
-                        value={eventoSeleccionado?.fecha?.slice(0, 10) || ""}
-                        onChange={(e) =>
-                          setEventoSeleccionado({
-                            ...eventoSeleccionado,
-                            fecha: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </Form.Group>
+                    <div className="d-flex flex-column flex-md-row gap-3">
+                      <Form.Group className="mb-3 flex-fill">
+                        <Form.Label>Fecha</Form.Label>
+                        <Form.Control
+                          type="date"
+                          value={eventoSeleccionado?.fecha?.slice(0, 10) || ""}
+                          onChange={(e) =>
+                            setEventoSeleccionado({
+                              ...eventoSeleccionado,
+                              fecha: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </Form.Group>
+
+                      <Form.Group className="mb-3 flex-fill">
+                        <Form.Label>Tipo</Form.Label>
+                        <Form.Select
+                          value={eventoSeleccionado?.tipo || "evento"}
+                          onChange={(e) =>
+                            setEventoSeleccionado({
+                              ...eventoSeleccionado,
+                              tipo: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="evento">Evento</option>
+                          <option value="asamblea">Asamblea</option>
+                          <option value="mantenimiento">Mantenimiento</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </div>
+
                     <Form.Group className="mb-3">
                       <Form.Label>Descripción</Form.Label>
                       <Form.Control
@@ -686,29 +724,15 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                         required
                       />
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Tipo</Form.Label>
-                      <Form.Select
-                        value={eventoSeleccionado?.tipo || "evento"}
-                        onChange={(e) =>
-                          setEventoSeleccionado({
-                            ...eventoSeleccionado,
-                            tipo: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="evento">Evento</option>
-                        <option value="asamblea">Asamblea</option>
-                        <option value="mantenimiento">Mantenimiento</option>
-                      </Form.Select>
-                    </Form.Group>
                   </Modal.Body>
-                  <Modal.Footer>
+
+                  <Modal.Footer className="d-flex flex-wrap gap-2">
                     {modalMode === "edit" && (
                       <Button
                         variant="danger"
                         onClick={handleDeleteEvento}
                         type="button"
+                        className="flex-grow-1 flex-md-grow-0"
                       >
                         Borrar
                       </Button>
@@ -716,10 +740,15 @@ function ConsorcioDetail({ API_BASE_URL, userRole }) {
                     <Button
                       variant="secondary"
                       onClick={() => setShowEventoModal(false)}
+                      className="flex-grow-1 flex-md-grow-0"
                     >
                       Cancelar
                     </Button>
-                    <Button variant="primary" type="submit">
+                    <Button
+                      variant="primary"
+                      type="submit"
+                      className="flex-grow-1 flex-md-grow-0"
+                    >
                       Guardar
                     </Button>
                   </Modal.Footer>
