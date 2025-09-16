@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: ["https://gestion-3kgo.onrender.com"],
+  origin: ["hhttps://gestion-c8m6.onrender.com"],
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
