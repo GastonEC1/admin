@@ -13,8 +13,7 @@ import {
 // Replace with a custom icon or SVG if needed in your final project.
 const FaSignInAlt = () => <span>&#x1F512;</span>;
 
-const BACKEND_BASE_URL =
-  "https://prueba-3-8t74.onrender.com";
+const BACKEND_BASE_URL = "https://gestion-c8m6.onrender.com";
 
 const AuthForm = ({ onAuthSuccess }) => {
   const [email, setEmail] = useState("");
@@ -73,18 +72,21 @@ const AuthForm = ({ onAuthSuccess }) => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#508bfc',
-      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-    }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#508bfc",
+        fontFamily:
+          'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      }}
+    >
       <Container className="py-5 h-100">
         <Row className="d-flex justify-content-center align-items-center h-100">
           <Col xs={12} md={8} lg={6} xl={5}>
-            <Card className="shadow-lg" style={{ borderRadius: '1rem' }}>
+            <Card className="shadow-lg" style={{ borderRadius: "1rem" }}>
               <Card.Body className="p-5 text-center">
                 <h3 className="mb-5">Iniciar Sesión</h3>
 
