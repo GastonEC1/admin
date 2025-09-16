@@ -148,45 +148,53 @@ const LoginMap = ({ authToken }) => {
   }
 
   return (
-    <Card className="shadow-lg mt-4">
-      <Card.Body>
-        <div
-          ref={mapRef}
-          style={{ height: "500px", width: "100%", borderRadius: "8px" }}
-        ></div>
-      </Card.Body>
-
-      <Card.Footer>
-        <h5 className="text-center mt-3">Historial Detallado</h5>
-        <div className="table-responsive">
-          <table className="table table-striped table-hover mt-3">
-            <thead>
-              <tr>
-                <th>Usuario</th>
-                <th>Fecha y Hora</th>
-                <th>Latitud</th>
-                <th>Longitud</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.slice(0, 10).map((login, index) => (
-                <tr
-                  key={index}
-                  onClick={() => handleRowClick(login)} // ✨ AÑADE EL EVENTO CLICK
-                  style={{ cursor: "pointer" }}
-                >
-                  <td>{login.user?.nombre}</td>
-                  <td>{new Date(login.timestamp).toLocaleString()}</td>
-                  <td>{login.lat}</td>
-                  <td>{login.lon}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card.Footer>
-    </Card>
-  );
+    <Card className="shadow-lg mt-4">
+      <Card.Body>
+        <div
+          ref={mapRef}
+          style={{ height: "500px", width: "100%", borderRadius: "8px" }}
+        ></div>
+      </Card.Body>
+  
+      <Card.Footer>
+        <h5 className="text-center mt-3">Historial Detallado</h5>
+        <div className="table-responsive">
+          <table className="table table-striped table-hover mt-3">
+            <thead>
+              <tr>
+                <th style={{ cursor: "pointer" }}>
+                  Usuario <span>⬍</span>
+                </th>
+                <th style={{ cursor: "pointer" }}>
+                  Fecha y Hora <span>⬍</span>
+                </th>
+                <th style={{ cursor: "pointer" }}>
+                  Latitud <span>⬍</span>
+                </th>
+                <th style={{ cursor: "pointer" }}>
+                  Longitud <span>⬍</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.slice(0, 10).map((login, index) => (
+                <tr
+                  key={index}
+                  onClick={() => handleRowClick(login)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <td>{login.user?.nombre}</td>
+                  <td>{new Date(login.timestamp).toLocaleString()}</td>
+                  <td>{login.lat}</td>
+                  <td>{login.lon}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card.Footer>
+    </Card>
+  );
 };
 
 export default LoginMap;
