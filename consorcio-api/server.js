@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet')
 const cors = require('cors');
+const path = require('path')
 require('dotenv').config();
 
 const app = express();
@@ -9,8 +10,7 @@ const PORT = process.env.PORT || 5000;
 
 const corsOptions = {
     origin: [
-        'https://refactored-xylophone-jv659gpjqq62jqr5-3000.app.github.dev', 
-        'http://localhost:3000'
+        'https://prueba-3-1-nmrz.onrender.com'
     ],
     optionsSuccessStatus: 200
 };
@@ -40,6 +40,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/email', emailRouter); 
 app.use('/api/calendars', calendarsRouter);
 app.use('/api/admin', adminRouter);
+
 
 app.get('/', (req, res) => {
   res.send('API de Gestión de Consorcios en funcionamiento');

@@ -23,7 +23,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import EditUserForm from './components/usuarios/EditUserForm.jsx';
 
-const API_BASE_URL = 'https://refactored-xylophone-jv659gpjqq62jqr5-5000.app.github.dev';
+const API_BASE_URL = 'https://prueba-3-8t74.onrender.com';
 
 // Componente ProtectedRoute fuera de AppContent para mejor organización y reutilización
 const ProtectedRoute = ({ children, roles, isAuthenticated, userRole, authLoading }) => {
