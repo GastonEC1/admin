@@ -68,24 +68,32 @@ function Consorcios() {
 
   useEffect(() => {
     const normalizedSearchTerm = normalizeString(searchTerm).trim();
-
+  
+    // Primero filtramos
+    let filtered = [];
     if (normalizedSearchTerm.length === 0) {
-      setFilteredConsorcios(consorcios);
+      filtered = [...consorcios];
     } else {
-      const filtered = consorcios.filter((cons) => {
+      filtered = consorcios.filter((cons) => {
         const normalizedNombre = normalizeString(cons.nombre);
         const normalizedDireccion = normalizeString(cons.direccion);
-
+  
         return (
           normalizedNombre.startsWith(normalizedSearchTerm) ||
           normalizedDireccion.startsWith(normalizedSearchTerm)
         );
       });
-      setFilteredConsorcios(filtered);
     }
-
+  
+    // Luego ordenamos alfabéticamente por nombre
+    filtered.sort((a, b) =>
+      a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" })
+    );
+  
+    setFilteredConsorcios(filtered);
     setCurrentPage(1);
   }, [consorcios, searchTerm]);
+  
 
   const totalPages = Math.ceil(filteredConsorcios.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;

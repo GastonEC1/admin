@@ -19,7 +19,6 @@ function AddInquilino() {
   const backendUrl = "https://gestion-3kgo.onrender.com/api";
   const token = localStorage.getItem("token");
 
-  // Efecto para cargar el nombre del consorcio si se desea mostrar en el formulario (opcional)
   const [consorcioNombre, setConsorcioNombre] = useState("");
   useEffect(() => {
     const fetchConsorcioName = async () => {
