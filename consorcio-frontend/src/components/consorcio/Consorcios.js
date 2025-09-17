@@ -34,6 +34,11 @@ function Consorcios() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [consorcioToDelete, setConsorcioToDelete] = useState(null);
 
+  const [sortConfig, setSortConfig] = useState({
+    key: "nombre",
+    direction: "asc",
+  });
+
   const backendUrl = "https://gestion-3kgo.onrender.com/api/consorcios";
   const token = localStorage.getItem("token");
 
@@ -66,10 +71,18 @@ function Consorcios() {
       });
   }, [backendUrl, token]);
 
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
   useEffect(() => {
     const normalizedSearchTerm = normalizeString(searchTerm).trim();
-  
-    // Primero filtramos
+
+    // Filtrar
     let filtered = [];
     if (normalizedSearchTerm.length === 0) {
       filtered = [...consorcios];
@@ -77,23 +90,26 @@ function Consorcios() {
       filtered = consorcios.filter((cons) => {
         const normalizedNombre = normalizeString(cons.nombre);
         const normalizedDireccion = normalizeString(cons.direccion);
-  
+
         return (
           normalizedNombre.startsWith(normalizedSearchTerm) ||
           normalizedDireccion.startsWith(normalizedSearchTerm)
         );
       });
     }
-  
-    // Luego ordenamos alfabéticamente por nombre
-    filtered.sort((a, b) =>
-      a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" })
-    );
-  
+
+    // Ordenar según sortConfig
+    filtered.sort((a, b) => {
+      const aKey = normalizeString(a[sortConfig.key]);
+      const bKey = normalizeString(b[sortConfig.key]);
+      if (aKey < bKey) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aKey > bKey) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
     setFilteredConsorcios(filtered);
     setCurrentPage(1);
-  }, [consorcios, searchTerm]);
-  
+  }, [consorcios, searchTerm, sortConfig]);
 
   const totalPages = Math.ceil(filteredConsorcios.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -204,33 +220,7 @@ function Consorcios() {
               </thead>
               <tbody>
                 {currentItems.map((consorcio) => (
-                  <tr key={consorcio._id}>
-                    <td className="align-middle">
-                      <Link
-                        to={`/consorcios/${consorcio._id}`}
-                        className="fw-bold text-decoration-none text-primary"
-                      >
-                        {consorcio.nombre}
-                      </Link>
-                    </td>
-                    <td className="align-middle">{consorcio.direccion}</td>
-                    <td className="align-middle text-center">
-                      <Link
-                        to={`/edit-consorcio/${consorcio._id}`}
-                        className="btn btn-outline-primary btn-sm me-2 rounded-pill"
-                      >
-                        <FaEdit className="me-2" /> Editar
-                      </Link>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        className="rounded-pill"
-                        onClick={() => handleShowConfirm(consorcio)}
-                      >
-                        <FaTrash className="me-2" /> Eliminar
-                      </Button>
-                    </td>
-                  </tr>
+                  <tr key={consorcio._id}>...</tr>
                 ))}
               </tbody>
             </Table>
