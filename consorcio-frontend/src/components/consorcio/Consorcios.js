@@ -213,14 +213,60 @@ function Consorcios() {
             >
               <thead className="bg-primary text-white">
                 <tr>
-                  <th className="py-3">Nombre</th>
-                  <th className="py-3">Dirección</th>
+                  <th
+                    className="py-3 cursor-pointer"
+                    onClick={() => handleSort("nombre")}
+                  >
+                    Nombre{" "}
+                    {sortConfig.key === "nombre"
+                      ? sortConfig.direction === "asc"
+                        ? "▲"
+                        : "▼"
+                      : ""}
+                  </th>
+                  <th
+                    className="py-3 cursor-pointer"
+                    onClick={() => handleSort("direccion")}
+                  >
+                    Dirección{" "}
+                    {sortConfig.key === "direccion"
+                      ? sortConfig.direction === "asc"
+                        ? "▲"
+                        : "▼"
+                      : ""}
+                  </th>
                   <th className="py-3 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {currentItems.map((consorcio) => (
-                  <tr key={consorcio._id}>...</tr>
+                  <tr key={consorcio._id}>
+                    <td className="align-middle">
+                      <Link
+                        to={`/consorcios/${consorcio._id}`}
+                        className="fw-bold text-decoration-none text-primary"
+                      >
+                        {consorcio.nombre}
+                      </Link>
+                    </td>
+                    <td className="align-middle">{consorcio.direccion}</td>
+                    <td className="align-middle text-center">
+                      <Link
+                        to={`/edit-consorcio/${consorcio._id}`}
+                        className="btn btn-outline-primary btn-sm me-2 rounded-pill"
+                      >
+                        <FaEdit className="me-2" /> Editar
+                      </Link>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="rounded-pill"
+                        onClick={() => handleShowConfirm(consorcio)}
+                      >
+                        <FaTrash className="me-2" /> Eliminar
+                      </Button>
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </Table>
