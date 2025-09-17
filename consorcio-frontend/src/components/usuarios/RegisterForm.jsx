@@ -139,7 +139,6 @@ function RegisterForm() {
                   >
                     <option value="admin">Administrador</option>
                     <option value="employee">Empleado</option>
-                    <option value="owner">Propietario</option>
                   </Form.Control>
                 </Form.Group>
 

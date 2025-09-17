@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Container, Card, Alert, Button } from "react-bootstrap";
+import { Container, Card, Alert, Button, Modal } from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
 function InquilinoDetail() {
@@ -12,6 +12,7 @@ function InquilinoDetail() {
   const [error, setError] = useState("");
   const [deleteSuccess, setDeleteSuccess] = useState("");
   const [deleteError, setDeleteError] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // ✨ nuevo estado
 
   const backendUrl = "https://gestion-3kgo.onrender.com/api/inquilinos";
   const token = localStorage.getItem("token");
@@ -36,27 +37,21 @@ function InquilinoDetail() {
   const handleDeleteInquilino = async () => {
     setDeleteSuccess("");
     setDeleteError("");
-    // --- AQUÍ ESTÁ LA ALERTA DE CONFIRMACIÓN ---
-    if (
-      window.confirm(
-        "¿Estás seguro de que quieres eliminar este inquilino? Esta acción no se puede deshacer."
-      )
-    ) {
-      try {
-        await axios.delete(`${backendUrl}/${id}`, {
-          headers: { "x-auth-token": token },
-        });
-        setDeleteSuccess("Inquilino eliminado con éxito.");
-        const consorcioId = inquilino?.consorcio?._id || inquilino?.consorcio;
-        if (consorcioId) {
-          navigate(`/consorcios/${consorcioId}`);
-        } else {
-          navigate("/consorcios");
-        }
-      } catch (err) {
-        setDeleteError("Error al eliminar el inquilino. Inténtalo de nuevo.");
-        console.error("Error deleting inquilino:", err);
+    try {
+      await axios.delete(`${backendUrl}/${id}`, {
+        headers: { "x-auth-token": token },
+      });
+      setDeleteSuccess("Inquilino eliminado con éxito.");
+      setShowDeleteModal(false); // cerrar modal
+      const consorcioId = inquilino?.consorcio?._id || inquilino?.consorcio;
+      if (consorcioId) {
+        navigate(`/consorcios/${consorcioId}`);
+      } else {
+        navigate("/consorcios");
       }
+    } catch (err) {
+      setDeleteError("Error al eliminar el inquilino. Inténtalo de nuevo.");
+      console.error("Error deleting inquilino:", err);
     }
   };
 
@@ -101,8 +96,7 @@ function InquilinoDetail() {
 
       <Card>
         <Card.Header as="h2">
-          {inquilino.nombre}
-          {inquilino.apellido}
+          {inquilino.nombre} {inquilino.apellido}
         </Card.Header>
         <Card.Body>
           {deleteSuccess && <Alert variant="success">{deleteSuccess}</Alert>}
@@ -126,12 +120,38 @@ function InquilinoDetail() {
             >
               <FaEdit /> Editar Inquilino
             </Link>
-            <Button variant="outline-danger" onClick={handleDeleteInquilino}>
+            <Button
+              variant="outline-danger"
+              onClick={() => setShowDeleteModal(true)} // abrir modal
+            >
               <FaTrash /> Eliminar Inquilino
             </Button>
           </div>
         </Card.Body>
       </Card>
+
+      {/* ✨ Modal de confirmación de eliminación */}
+      <Modal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirmar Eliminación</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          ¿Estás seguro de que quieres eliminar este inquilino? Esta acción no
+          se puede deshacer.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={handleDeleteInquilino}>
+            Eliminar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
