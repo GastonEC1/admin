@@ -113,6 +113,7 @@ const LoginMap = ({ authToken }) => {
             <strong>Usuario: ${login.user?.nombre || "No encontrado"}</strong><br/>
             <hr style="margin:5px 0;" />
             Ubicación: ${login.city || "Desconocida"}, ${login.country || "Desconocido"}<br/>
+            ISP: ${login.org || "Desconocido"}<br/>
             IP: ${login.ipAddress}<br/>
             Fecha: ${new Date(login.timestamp).toLocaleString()}
           `);
@@ -192,6 +193,8 @@ const LoginMap = ({ authToken }) => {
                 >
                   Fecha y Hora <span>⬍</span>
                 </th>
+                <th>IP</th>
+                <th>ISP</th>
                 <th
                   style={{ cursor: "pointer" }}
                   onClick={() => requestSort("lat")}
@@ -215,6 +218,8 @@ const LoginMap = ({ authToken }) => {
                 >
                   <td>{login.user?.nombre}</td>
                   <td>{new Date(login.timestamp).toLocaleString()}</td>
+                  <td>{login.ipAddress}</td>
+                  <td>{login.org || "Desconocido"}</td>
                   <td>{login.lat}</td>
                   <td>{login.lon}</td>
                 </tr>
