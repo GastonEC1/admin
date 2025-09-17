@@ -193,8 +193,6 @@ const LoginMap = ({ authToken }) => {
                 >
                   Fecha y Hora <span>⬍</span>
                 </th>
-                <th>IP</th>
-                <th>ISP</th>
                 <th
                   style={{ cursor: "pointer" }}
                   onClick={() => requestSort("lat")}
