@@ -218,8 +218,6 @@ const LoginMap = ({ authToken }) => {
                 >
                   <td>{login.user?.nombre}</td>
                   <td>{new Date(login.timestamp).toLocaleString()}</td>
-                  <td>{login.ipAddress}</td>
-                  <td>{login.org || "Desconocido"}</td>
                   <td>{login.lat}</td>
                   <td>{login.lon}</td>
                 </tr>
